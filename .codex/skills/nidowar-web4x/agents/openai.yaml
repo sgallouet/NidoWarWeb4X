@@ -1,0 +1,4 @@
+interface:
+  display_name: "NidoWar Web4X"
+  short_description: "Build small, optimized isometric NidoWar game slices."
+  default_prompt: "Use $nidowar-web4x to implement the next NidoWar world-map feature."

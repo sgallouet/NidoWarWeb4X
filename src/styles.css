@@ -1,0 +1,102 @@
+:root {
+  color-scheme: dark;
+  --ink: #f6eac9;
+  --panel: rgba(19, 22, 24, 0.68);
+  --line: rgba(255, 231, 167, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #18202a;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(240, 206, 122, 0.14), transparent 34rem),
+    linear-gradient(180deg, #263641 0%, #12171f 100%);
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+  image-rendering: auto;
+}
+
+.hud {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(10px);
+}
+
+.loading {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--panel);
+  font: 700 13px/1 Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
+body.ready .loading {
+  display: none;
+}
+
+button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 231, 167, 0.42);
+  border-radius: 7px;
+  color: var(--ink);
+  background: linear-gradient(180deg, #485059, #22282f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  font: 700 22px/1 Georgia, "Times New Roman", serif;
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+  border-color: rgba(255, 229, 132, 0.86);
+  outline: none;
+}
+
+@media (max-width: 620px) {
+  .hud {
+    grid-template-columns: repeat(3, 36px);
+    gap: 6px;
+  }
+
+  button {
+    width: 36px;
+    height: 36px;
+  }
+}

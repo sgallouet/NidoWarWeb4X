@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>NidoWar Web4X</title>
+    <link rel="stylesheet" href="./src/styles.css">
+  </head>
+  <body>
+    <canvas id="world" aria-label="NidoWar isometric world preview"></canvas>
+    <div id="loading" class="loading" role="status" aria-live="polite">Loading</div>
+    <div class="hud" aria-label="world controls">
+      <button id="zoomIn" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="zoomOut" type="button" title="Zoom out" aria-label="Zoom out">-</button>
+      <button id="reroll" type="button" title="New scene" aria-label="New scene">R</button>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
