@@ -1,7 +1,8 @@
-export function createRenderer(canvas, camera, scene, atlases) {
+export function createRenderer(canvas, camera, scene, art) {
   const context = canvas.getContext("2d", { alpha: true });
-  const tileWidth = 112;
-  const tileHeight = 56;
+  const tileWidth = art.tile.width;
+  const tileHeight = art.tile.height;
+  const objectOffsetY = art.tile.objectOffsetY ?? 0;
   let width = 0;
   let height = 0;
   let pixelRatio = 1;
@@ -44,33 +45,49 @@ export function createRenderer(canvas, camera, scene, atlases) {
       if (!isVisible(position, bounds)) continue;
       drawTile(position, tile.sprite);
       for (const item of tile.items) {
+        const asset = art.assets[item.sprite];
+        const itemPosition = projectItem(tile, asset);
         drawables.push({
-          y: position.y + item.sort,
-          position,
+          y: itemPosition.y + item.dy + (asset.draw.depth ?? 0) + (item.depth ?? 0),
+          position: itemPosition,
           item,
+          asset,
         });
       }
     }
 
     drawables
       .sort((a, b) => a.y - b.y)
-      .forEach(({ position, item }) => drawSprite(position.x + item.dx, position.y + item.dy, item.sprite));
+      .forEach(({ position, item, asset }) => drawSprite(position.x + item.dx, position.y + item.dy, asset));
 
     context.restore();
   }
 
   function drawTile(position, sprite) {
-    const image = atlases[sprite.atlas];
-    context.drawImage(image, sprite.x, sprite.y, sprite.w, sprite.h, position.x - 76, position.y - 38, 152, 104);
+    const asset = art.assets[sprite];
+    const draw = asset.draw;
+    context.drawImage(
+      asset.image,
+      position.x - draw.width * draw.anchorX,
+      position.y - draw.height * draw.anchorY,
+      draw.width,
+      draw.height,
+    );
   }
 
-  function drawSprite(x, y, sprite) {
-    const image = atlases[sprite.atlas];
-    const scale = sprite.scale ?? 1;
-    const width = sprite.w * scale;
-    const height = sprite.h * scale;
-    if (sprite.shadow) drawShadow(x, y, width);
-    context.drawImage(image, sprite.x, sprite.y, sprite.w, sprite.h, x - width / 2, y - height, width, height);
+  function drawSprite(x, y, asset) {
+    const draw = asset.draw;
+    const image = asset.image;
+    const height = draw.height;
+    const width = draw.width ?? Math.round(image.width * (height / image.height));
+    if (draw.shadow) drawShadow(x, y, width);
+    context.drawImage(
+      image,
+      x - width * (draw.anchorX ?? 0.5),
+      y - height * (draw.anchorY ?? 1),
+      width,
+      height,
+    );
   }
 
   function drawShadow(x, y, width) {
@@ -88,6 +105,17 @@ export function createRenderer(canvas, camera, scene, atlases) {
       x: (x - y) * tileWidth / 2,
       y: (x + y) * tileHeight / 2,
     };
+  }
+
+  function projectItem(tile, asset) {
+    const placement = asset.placement ?? {};
+    const footprint = placement.footprint ?? { width: 1, height: 1 };
+    const center = placement.center ?? {
+      x: (footprint.width - 1) / 2,
+      y: (footprint.height - 1) / 2,
+    };
+    const position = project(tile.x + center.x, tile.y + center.y);
+    return { x: position.x, y: position.y + objectOffsetY };
   }
 
   function visibleBounds(translateX, translateY) {
@@ -109,7 +137,12 @@ export function createRenderer(canvas, camera, scene, atlases) {
 
   window.addEventListener("resize", requestRender);
 
-  return { start: requestRender, requestRender };
+  return {
+    start() {
+      requestRender();
+    },
+    requestRender,
+  };
 }
 
 function drawBackdrop(context, width, height) {

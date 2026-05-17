@@ -1,0 +1,1169 @@
+{
+  "version": 1,
+  "notes": "Uneven AI atlas input. Every asset uses explicit rect, runtime size, anchor, and depth metadata. Regenerate cropped sprites and debug sheets with tools/art_pipeline.py.",
+  "sourceAtlases": {
+    "terrain": "ressources/atlases/terrain.png",
+    "props": "ressources/atlases/props.png",
+    "buildings": "ressources/atlases/buildings.png",
+    "units": "ressources/atlases/units-kingdom.png",
+    "castleUprez": "ressources/atlases/castle-uprez.png"
+  },
+  "tile": {
+    "width": 112,
+    "height": 56,
+    "drawWidth": 152,
+    "drawHeight": 104,
+    "objectOffsetY": -18
+  },
+  "assets": {
+    "tiles.grass": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/grass.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.flowerGrass": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/flower-grass.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.dirt": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/dirt.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.oldRoad": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/old-road.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.stone": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/stone.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.plaza": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/plaza.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.water": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        40,
+        421,
+        155,
+        133
+      ],
+      "file": "ressources/sprites/tiles/water.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.shore": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        637,
+        421,
+        142,
+        133
+      ],
+      "file": "ressources/sprites/tiles/shore.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.farm": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/farm.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.wheat": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/wheat.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "tiles.snow": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        791,
+        821,
+        134,
+        114
+      ],
+      "file": "ressources/sprites/tiles/snow.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "trees.pine": {
+      "kind": "tree",
+      "atlas": "props",
+      "rect": [
+        25,
+        18,
+        80,
+        135
+      ],
+      "file": "ressources/sprites/trees/pine.png",
+      "draw": {
+        "height": 86,
+        "anchorX": 0.5,
+        "anchorY": 0.95,
+        "depth": 34,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "trees.slimPine": {
+      "kind": "tree",
+      "atlas": "props",
+      "rect": [
+        313,
+        26,
+        43,
+        127
+      ],
+      "file": "ressources/sprites/trees/slim-pine.png",
+      "draw": {
+        "height": 78,
+        "anchorX": 0.5,
+        "anchorY": 0.95,
+        "depth": 32,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "trees.oak": {
+      "kind": "tree",
+      "atlas": "props",
+      "rect": [
+        467,
+        25,
+        86,
+        123
+      ],
+      "file": "ressources/sprites/trees/oak.png",
+      "draw": {
+        "height": 88,
+        "anchorX": 0.5,
+        "anchorY": 0.94,
+        "depth": 34,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "trees.round": {
+      "kind": "tree",
+      "atlas": "props",
+      "draw": {
+        "height": 88,
+        "anchorX": 0.5,
+        "anchorY": 0.94,
+        "depth": 34,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "rect": [
+        572,
+        22,
+        93,
+        127
+      ],
+      "file": "ressources/sprites/trees/round.png"
+    },
+    "trees.pink": {
+      "kind": "tree",
+      "atlas": "props",
+      "rect": [
+        794,
+        19,
+        101,
+        131
+      ],
+      "file": "ressources/sprites/trees/pink.png",
+      "draw": {
+        "height": 88,
+        "anchorX": 0.5,
+        "anchorY": 0.94,
+        "depth": 34,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "props.stoneCluster": {
+      "kind": "prop",
+      "atlas": "props",
+      "rect": [
+        598,
+        292,
+        69,
+        70
+      ],
+      "file": "ressources/sprites/props/stone-cluster.png",
+      "draw": {
+        "height": 34,
+        "anchorX": 0.5,
+        "anchorY": 0.92,
+        "depth": 12,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "props.blueBanner": {
+      "kind": "prop",
+      "atlas": "props",
+      "rect": [
+        172,
+        514,
+        55,
+        108
+      ],
+      "file": "ressources/sprites/props/blue-banner.png",
+      "draw": {
+        "height": 56,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 24,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "props.lamp": {
+      "kind": "prop",
+      "atlas": "props",
+      "rect": [
+        1082,
+        397,
+        47,
+        106
+      ],
+      "file": "ressources/sprites/props/lamp.png",
+      "draw": {
+        "height": 48,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 20,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "props.wagon": {
+      "kind": "prop",
+      "atlas": "props",
+      "rect": [
+        189,
+        658,
+        75,
+        75
+      ],
+      "file": "ressources/sprites/props/wagon.png",
+      "draw": {
+        "height": 38,
+        "anchorX": 0.5,
+        "anchorY": 0.86,
+        "depth": 14,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "props.crystal": {
+      "kind": "prop",
+      "atlas": "props",
+      "rect": [
+        1127,
+        771,
+        88,
+        124
+      ],
+      "file": "ressources/sprites/props/crystal.png",
+      "draw": {
+        "height": 58,
+        "anchorX": 0.5,
+        "anchorY": 0.96,
+        "depth": 18,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "buildings.cottage": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        56,
+        59,
+        97,
+        115
+      ],
+      "file": "ressources/sprites/buildings/cottage.png",
+      "draw": {
+        "height": 86,
+        "anchorX": 0.5,
+        "anchorY": 0.91,
+        "depth": 8,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "buildings.manor": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        802,
+        28,
+        131,
+        151
+      ],
+      "file": "ressources/sprites/buildings/manor.png",
+      "draw": {
+        "height": 134,
+        "anchorX": 0.5,
+        "anchorY": 0.91,
+        "depth": 8,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 2,
+          "height": 2
+        },
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "buildings.market": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        29,
+        234,
+        166,
+        130
+      ],
+      "file": "ressources/sprites/buildings/market.png",
+      "draw": {
+        "height": 132,
+        "anchorX": 0.5,
+        "anchorY": 0.9,
+        "depth": 8,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 2,
+          "height": 2
+        },
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "buildings.tower": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        418,
+        232,
+        92,
+        130
+      ],
+      "file": "ressources/sprites/buildings/tower.png",
+      "draw": {
+        "height": 100,
+        "anchorX": 0.5,
+        "anchorY": 0.93,
+        "depth": 8,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "buildings.church": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        936,
+        221,
+        108,
+        139
+      ],
+      "file": "ressources/sprites/buildings/church.png",
+      "draw": {
+        "height": 130,
+        "anchorX": 0.5,
+        "anchorY": 0.92,
+        "depth": 8,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 2,
+          "height": 2
+        },
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "buildings.wall": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        417,
+        586,
+        127,
+        100
+      ],
+      "file": "ressources/sprites/buildings/wall.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.86,
+        "depth": 4,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "buildings.castle": {
+      "kind": "building",
+      "atlas": "castleUprez",
+      "rect": [
+        38,
+        5,
+        1336,
+        1041
+      ],
+      "file": "ressources/sprites/buildings/castle-uprez.png",
+      "draw": {
+        "height": 340,
+        "anchorX": 0.5,
+        "anchorY": 0.91,
+        "depth": 4,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 4,
+          "height": 4
+        },
+        "center": {
+          "x": 1.5,
+          "y": 1.5
+        }
+      }
+    },
+    "buildings.hall": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        363,
+        819,
+        231,
+        225
+      ],
+      "file": "ressources/sprites/buildings/hall.png",
+      "draw": {
+        "height": 190,
+        "anchorX": 0.5,
+        "anchorY": 0.91,
+        "depth": 2,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 3,
+          "height": 3
+        },
+        "center": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "buildings.arena": {
+      "kind": "building",
+      "atlas": "buildings",
+      "rect": [
+        1231,
+        864,
+        172,
+        163
+      ],
+      "file": "ressources/sprites/buildings/arena.png",
+      "draw": {
+        "height": 172,
+        "anchorX": 0.5,
+        "anchorY": 0.88,
+        "depth": 6,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 3,
+          "height": 3
+        },
+        "center": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "units.swordsman": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        30,
+        56,
+        93,
+        118
+      ],
+      "file": "ressources/sprites/units/swordsman.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.shield": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        155,
+        58,
+        78,
+        117
+      ],
+      "file": "ressources/sprites/units/shield.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.archer": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        1124,
+        71,
+        77,
+        104
+      ],
+      "file": "ressources/sprites/units/archer.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.crossbow": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        40,
+        244,
+        83,
+        100
+      ],
+      "file": "ressources/sprites/units/crossbow.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.horse": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        402,
+        214,
+        102,
+        145
+      ],
+      "file": "ressources/sprites/units/horse.png",
+      "draw": {
+        "height": 78,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.wizard": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        41,
+        411,
+        88,
+        115
+      ],
+      "file": "ressources/sprites/units/wizard.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.banner": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        1125,
+        373,
+        72,
+        161
+      ],
+      "file": "ressources/sprites/units/banner.png",
+      "draw": {
+        "height": 78,
+        "anchorX": 0.5,
+        "anchorY": 0.98,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.dwarf": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        32,
+        608,
+        83,
+        86
+      ],
+      "file": "ressources/sprites/units/dwarf.png",
+      "draw": {
+        "height": 56,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.gryphon": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        27,
+        742,
+        111,
+        124
+      ],
+      "file": "ressources/sprites/units/gryphon.png",
+      "draw": {
+        "height": 82,
+        "anchorX": 0.5,
+        "anchorY": 0.96,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.purpleKnight": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        868,
+        753,
+        74,
+        119
+      ],
+      "file": "ressources/sprites/units/purple-knight.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.purpleMage": {
+      "kind": "unit",
+      "atlas": "units",
+      "rect": [
+        1211,
+        925,
+        104,
+        114
+      ],
+      "file": "ressources/sprites/units/purple-mage.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    }
+  },
+  "cacheVersion": "hires-forest-1"
+}
