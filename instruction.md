@@ -4,9 +4,9 @@
 
 - Isometric 3/4 angle tile world map including towns, armies, ressource and terrains
 - Turn by turn 4X game with limited movement and action in the world map for each turn
-- Each armies can consist of up to 4 unit groups or heroes
+- Each armies consist of a hero leader (which have the empire flag) and units (or multiple hero) - in the world map we only see the hero
 - Attacking another armie consist on moving into their tie and enfellow as such :
-    - Game zoom into the 9 tiles -the others become blac&white - in the center is the army being attacked
+    - Game zoom into the 9 tiles surrounding the attcked tile -the others tiles become blac&white - in the center is the army being attacked
     - All armies present in the 9 tiles would be there
     - Each tiles have a subdivision of 4 sub tile, with each subtile having one of the unit group / heroes in user pre configred formation 
         - the attacker can choose to change his formation
@@ -27,7 +27,7 @@
 - Castle can build new units if the correct building was constructed first
 - Town generate +1 population point per week, when an army enter a town they can growth +1 at the end of the turn for each population point the town have.
 - Each day have 5 turn : 6am, 1pm, 4pm, 8pm, 1am
--
+
 
 ## Code design
 

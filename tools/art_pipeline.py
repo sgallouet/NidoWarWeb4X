@@ -29,6 +29,8 @@ def crop_manifest_assets(manifest_path: Path, root: Path) -> list[Path]:
     }
     written: list[Path] = []
     for asset_id, asset in manifest["assets"].items():
+        if asset.get("source") == "file":
+            continue
         if "frames" in asset:
             for frame in asset["frames"]:
                 crop = crop_asset_frame(atlases[asset["atlas"]], frame, asset)

@@ -42,7 +42,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.flowerGrass": {
       "kind": "tile",
@@ -70,7 +71,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.dirt": {
       "kind": "tile",
@@ -98,7 +100,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.oldRoad": {
       "kind": "tile",
@@ -126,7 +129,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.stone": {
       "kind": "tile",
@@ -154,7 +158,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.plaza": {
       "kind": "tile",
@@ -182,7 +187,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.water": {
       "kind": "tile",
@@ -266,7 +272,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.wheat": {
       "kind": "tile",
@@ -294,7 +301,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.snow": {
       "kind": "tile",
@@ -1163,7 +1171,210 @@
           "y": 0
         }
       }
+    },
+    "tiles.grassClean": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/grass-clean.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.flowerGrassBright": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/flower-grass-bright.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.flowerGrassDense": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/flower-grass-dense.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.dirtRocks": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/dirt-rocks.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.oldRoadMoss": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/old-road-moss.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.stonePlants": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/stone-plants.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.plazaMoss": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/plaza-moss.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
     }
   },
-  "cacheVersion": "hires-forest-1"
+  "cacheVersion": "hires-forest-2"
 }

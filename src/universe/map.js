@@ -17,11 +17,11 @@ export function createScene(seed = 7) {
   addOutpost(tiles, 18, 61);
   addOutpost(tiles, 72, 62);
 
-  scatter(tiles, random, "trees.pine", 900, (x, y) => y < 35 || x < 18 || ridge(x, y));
-  scatter(tiles, random, "trees.slimPine", 320, (x, y) => y < 42 || ridge(x, y));
-  scatter(tiles, random, "trees.oak", 760, (x, y) => x < 46 || y < 55 || x > 72);
-  scatter(tiles, random, "trees.round", 620, (x, y) => x > 35 && y < 72);
-  scatter(tiles, random, "trees.pink", 90, (x, y) => x > 52 && y > 18 && y < 65);
+  scatter(tiles, random, "trees.pine", 1200, (x, y) => y < 36 || x < 20 || ridge(x, y));
+  scatter(tiles, random, "trees.slimPine", 500, (x, y) => y < 45 || ridge(x, y));
+  scatter(tiles, random, "trees.oak", 1100, (x, y) => x < 48 || y < 58 || x > 70);
+  scatter(tiles, random, "trees.round", 900, (x, y) => x > 32 && y < 76);
+  scatter(tiles, random, "trees.pink", 140, (x, y) => x > 50 && y > 17 && y < 68);
   scatter(tiles, random, "props.stoneCluster", 210, (x, y) => ridge(x, y) || y > 70);
   scatter(tiles, random, "props.crystal", 34, (x, y) => x > 58 && y > 55);
   scatter(tiles, random, "props.wagon", 18, nearAnySettlement);
@@ -51,12 +51,12 @@ function chooseTerrain({ x, y, random }) {
   const village = nearAnySettlement(x, y);
   if (river) return "tiles.water";
   if (shore) return "tiles.shore";
-  if (ridge(x, y)) return random() > 0.48 ? "tiles.stone" : "tiles.snow";
-  if (village) return random() > 0.42 ? "tiles.plaza" : "tiles.oldRoad";
-  if (x > 8 && x < 31 && y > 47 && y < 68) return random() > 0.5 ? "tiles.farm" : "tiles.wheat";
-  if (random() > 0.82) return "tiles.flowerGrass";
-  if (random() > 0.74) return "tiles.dirt";
-  return "tiles.grass";
+  if (ridge(x, y)) return random() > 0.42 ? pick(random, stoneTiles) : "tiles.snow";
+  if (village) return random() > 0.36 ? pick(random, plazaTiles) : pick(random, roadTiles);
+  if (x > 8 && x < 31 && y > 47 && y < 68) return random() > 0.45 ? "tiles.farm" : "tiles.wheat";
+  if (random() > 0.78) return pick(random, flowerTiles);
+  if (random() > 0.72) return pick(random, dirtTiles);
+  return pick(random, grassTiles);
 }
 
 function addSettlement(tiles, x, y) {
@@ -120,6 +120,17 @@ function nearAnySettlement(x, y) {
 function near(x, y, cx, cy, radius) {
   return Math.abs(x - cx) + Math.abs(y - cy) <= radius;
 }
+
+function pick(random, choices) {
+  return choices[Math.floor(random() * choices.length)];
+}
+
+const grassTiles = ["tiles.grass", "tiles.grassClean"];
+const flowerTiles = ["tiles.flowerGrass", "tiles.flowerGrassBright", "tiles.flowerGrassDense"];
+const dirtTiles = ["tiles.dirt", "tiles.dirtRocks"];
+const roadTiles = ["tiles.oldRoad", "tiles.oldRoadMoss"];
+const stoneTiles = ["tiles.stone", "tiles.stonePlants"];
+const plazaTiles = ["tiles.plaza", "tiles.plazaMoss", "tiles.oldRoad", "tiles.oldRoadMoss"];
 
 function mulberry32(seed) {
   return function next() {

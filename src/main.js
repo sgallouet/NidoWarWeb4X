@@ -1,11 +1,11 @@
 import { loadArtCatalog } from "./engine/artCatalog.js";
 import { createCamera, zoomCamera } from "./engine/camera.js";
-import { createRenderer } from "./engine/renderer.js?v=hires-forest-1";
+import { createRenderer } from "./engine/renderer.js?v=hires-forest-2";
 import { createScene } from "./universe/map.js";
 
 const canvas = document.querySelector("#world");
 const loading = document.querySelector("#loading");
-const ART_VERSION = "hires-forest-1";
+const ART_VERSION = "hires-forest-2";
 let seed = 11;
 let renderer;
 const camera = createCamera(canvas, () => renderer?.requestRender());

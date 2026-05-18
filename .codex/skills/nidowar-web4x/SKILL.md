@@ -43,6 +43,7 @@ Treat supplied atlases as bad input by default: uneven spacing, inconsistent sca
 - Runtime tile coordinates project to the tile sprite's logical center; `tile.objectOffsetY` can lift object contact points onto the visible center of the top diamond. Keep `placement.center: { "x": 0, "y": 0 }` for 1x1 trees, props, towers, and units so the sprite contact point sits in the middle of its tile diamond. Multi-tile assets use `{ "x": (width - 1) / 2, "y": (height - 1) / 2 }`.
 - Use `draw.anchorX`, `draw.anchorY`, and `draw.depth` for contact-point depth sorting. Sort by the object foot/contact point, not by sprite top or owning tile alone.
 - Crop individual sprites with `python tools/art_pipeline.py --manifest ressources/art/assets.json --debug ressources/art/crop-debug.png`.
+- For already-cropped transparent tile PNGs, mark manifest entries with `"source": "file"` so the crop pipeline visualizes them but does not overwrite them from an atlas.
 - Inspect `ressources/art/crop-debug.png` before accepting art changes. It shows crop bounds, runtime size, and anchor/depth guides.
 - Use `python tools/art_pipeline.py --components ressources/atlases/<atlas>.png` to print alpha-component rect candidates when authoring new manifest entries.
 - Do not animate trees or world-map props by default. Static, well-scaled silhouettes are preferred until an animation pass is explicitly requested and validated in-game.
