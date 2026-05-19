@@ -9,11 +9,24 @@
   <body>
     <canvas id="world" aria-label="NidoWar isometric world preview"></canvas>
     <div id="loading" class="loading" role="status" aria-live="polite">Loading</div>
-    <div class="hud" aria-label="world controls">
-      <button id="zoomIn" type="button" title="Zoom in" aria-label="Zoom in">+</button>
-      <button id="zoomOut" type="button" title="Zoom out" aria-label="Zoom out">-</button>
+    <div id="worldControls" class="hud is-folded" aria-label="world controls">
+      <button id="controlsToggle" type="button" title="Controls" aria-label="Open controls" aria-expanded="false">≡</button>
       <button id="reroll" type="button" title="New scene" aria-label="New scene">R</button>
     </div>
-    <script type="module" src="./src/main.js?v=hires-forest-2"></script>
+    <section class="perf-monitor" aria-label="Frame generation time">
+      <span class="perf-value"><span id="frameMs">--</span> ms</span>
+      <canvas id="perfGraph" aria-hidden="true"></canvas>
+    </section>
+    <div id="worldGroup" class="world-group" hidden aria-label="Selected army group"></div>
+    <div id="worldEnemyGroup" class="world-group is-enemy" hidden aria-label="Inspected enemy group"></div>
+    <div id="traitTip" class="trait-tip" hidden aria-live="polite"></div>
+    <div id="healthStrip" class="health-strip" hidden aria-label="Battle health"></div>
+    <div id="battleHud" class="battle-hud" hidden>
+      <div class="battle-row">
+        <div id="battleReadout" class="battle-readout">Ready</div>
+        <button id="waitTurn" type="button" title="Wait" aria-label="Wait">W</button>
+      </div>
+    </div>
+    <script type="module" src="./src/main.js?v=battle-test-43"></script>
   </body>
 </html>

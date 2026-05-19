@@ -15,6 +15,21 @@ Build the game in small, readable slices. Keep files focused, avoid large centra
 - Use atlas-based sprites and batch-friendly canvas/WebGL patterns when possible.
 - Keep UI minimal, tactile, and retro J-RPG inspired, with as little text as possible.
 - Ask when requirements are genuinely ambiguous; otherwise choose the smallest maintainable implementation.
+- Do not use Codex app steering/task-plan directives for this repo. They have repeatedly surfaced `{"detail":"Bad Request"}` in the user-visible thread and interrupt the work. Track progress with short normal messages only.
+- Also use `nidowar-requirement-ledger` for this repo so new user requirements are kept as one-line memory entries when they are not already in `INSTRUCTION.md`.
+- Keep entry files tiny: `src/main.js`, `src/engine/renderer.js`, and facade modules should only wire focused classes together. Put behavior in named managers such as `GameApp`, `WorldManager`, `BattleManager`, `Tile`, `Unit`, and rendering backends.
+- Enforce one active unit or army per tile. Formation placement, world movement, battle movement, and AI movement must check tile occupancy before moving or spawning units.
+- On the world map, clicking a non-adjacent enemy army inspects it: show its possible movement tiles and a right-side army panel. Reveal only the world-map representative unit; unknown formation members should render as `??` until battle or scouting rules reveal them.
+- Battle HUD should show player units on the left and enemy units on the right. Player unit names are persistent per unit type, and move/attack actions are separate flags that grey out when spent.
+- During player battle control, allow selecting any living player unit from the map or HUD. Movement is provisional until an attack or committed action, so a moved unit may choose a different reachable tile from its original turn position before attacking.
+- Melee battle attacks use the 8 neighboring tiles, including diagonals. Ranged attacks keep their normal distance rule.
+- Some warrior units can have leveled counter traits (`counter1` to `counter4`) that hit back only when melee attacked, scaling from 20% to 50% of their current damage.
+- Props/buildings on tiles block world and battle movement. In battle, active-area props must render in color even while inactive tiles outside the fight are greyscale. Warrior units have a blocking trait: movement may enter reachable adjacent guard tiles, shown yellow, but cannot path through them to pass behind the warrior.
+- Trees are non-blocking cover props. If a unit stands on a tree tile, draw the tree offset up/side and translucent so the unit remains readable; props near/over units should fade instead of hiding units. Compute these cover effects only for visible tiles. Use one unified visible-prop rendering path for world and battle so houses, trees, and other props follow the same readability rules in both modes.
+- Unit stats, class, strength, and traits belong in `src/universe/unit/unitCatalog.js`. Test armies may randomly sample their formation from unit pools, and the world-map army sprite should use the strongest unit in that formation.
+- Archer-style units should use one named shot trait from the catalog: `volley` attacks twice only if stationary, `rootedShot` attacks only if stationary, and `skirmishShot` can move then attack with low movement. Trait icons in army panels should be clickable and explain the trait.
+- Tile highlights must alter the actual tile sprite using its source alpha, preferably through cached tinted tile variants. Do not draw separate rectangular or hand-guessed diamond overlays for movement/attack highlights; they drift from the art and create visible artifacts.
+- Tile highlights must be drawn during the ground tile pass in back-to-front isometric diagonal order (`x + y`), never as a post-ground overlay, because isometric tile sprites can overlap and stacked highlights appear to climb above neighboring tiles.
 
 ** MANDATORY ** READ THE FULL INSTRUCTION.MD BEFORE STARTING. It contains critical information about project structure, art pipeline, gameplay memory, and validation steps.
 
@@ -39,6 +54,7 @@ Treat supplied atlases as bad input by default: uneven spacing, inconsistent sca
 - Every object sprite should also declare `placement.footprint` and `placement.center`; use square tile footprints of `1x1`, `2x2`, `3x3`, or `4x4` unless the user explicitly wants a special shape. The renderer projects that footprint center automatically.
 - Defense towers are `1x1` and centered in their owning tile. Castles are `4x4`. Medium buildings should generally be `2x2`; large civic buildings can be `3x3`.
 - Use explicit `draw.height` or tile `draw.width`/`draw.height` to normalize runtime scale. In the world-map preview, use one visible unit sprite per tile and make humans large enough to read clearly at normal zoom.
+- When adding units from mixed atlases, normalize humanoids around the established 56-66px world height, use larger monsters sparingly, and prefer a draw-time `flipX` flag for facing rather than altering source atlas art.
 - Trees are one centered tree per tile; vary tree type and density by map placement, not by placing several trees inside one tile.
 - Runtime tile coordinates project to the tile sprite's logical center; `tile.objectOffsetY` can lift object contact points onto the visible center of the top diamond. Keep `placement.center: { "x": 0, "y": 0 }` for 1x1 trees, props, towers, and units so the sprite contact point sits in the middle of its tile diamond. Multi-tile assets use `{ "x": (width - 1) / 2, "y": (height - 1) / 2 }`.
 - Use `draw.anchorX`, `draw.anchorY`, and `draw.depth` for contact-point depth sorting. Sort by the object foot/contact point, not by sprite top or owning tile alone.
@@ -61,4 +77,17 @@ Treat supplied atlases as bad input by default: uneven spacing, inconsistent sca
 
 ## Before Finishing
 
-Run the lightest useful local validation. For art work, regenerate crops and inspect the debug sheet. For frontend visual work, open or serve the app and verify the canvas is nonblank at mobile and desktop sizes.
+Only test when the user explicitly asks for testing, or when the task is risky enough that skipping validation would likely leave the project broken. For easy/small tasks, avoid extra validation and browser checks to save tokens.
+
+After finishing a task in this repo, restart the local game preview with `powershell -ExecutionPolicy Bypass -File tools\restart_game.ps1` so the browser gets the newest files.
+
+Never emit Codex app workflow directives in the final answer for this repo unless the user explicitly asks for the corresponding app action. Use plain text summaries only.
+
+## Don't Do List
+
+Add a one-line entry here whenever an approach wastes tokens, breaks the flow, or fails in a way that is likely to be repeated.
+
+- Do not use Codex app steering/task-plan directives in this repo; they caused user-visible `{"detail":"Bad Request"}` interruptions.
+- Do not use `Set-Content` or shell write tricks for source edits on Windows; it can hit access errors and wastes tokens, so use `apply_patch`.
+- Do not draw tile highlights as a post-ground overlay; draw tile color states inside the ground pass in isometric diagonal order.
+- Do not build large terrain/render caches synchronously in one lump; chunk cache rebuilds asynchronously so the main thread can breathe between frames.

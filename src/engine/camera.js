@@ -5,6 +5,7 @@ export function createCamera(canvas, onChange = () => {}) {
     zoom: 0.92,
     minZoom: 0.58,
     maxZoom: 1.52,
+    canvas,
   };
 
   const pointers = new Map();
@@ -31,7 +32,11 @@ export function createCamera(canvas, onChange = () => {}) {
     const [a, b] = [...pointers.values()];
     const distance = Math.hypot(a.x - b.x, a.y - b.y);
     if (lastDistance) {
-      camera.zoom = clamp(camera.zoom * (distance / lastDistance), camera.minZoom, camera.maxZoom);
+      const midpoint = {
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2,
+      };
+      zoomAt(camera, distance / lastDistance, midpoint.x, midpoint.y);
       onChange();
     }
     lastDistance = distance;
@@ -41,7 +46,7 @@ export function createCamera(canvas, onChange = () => {}) {
   canvas.addEventListener("pointercancel", endPointer);
   canvas.addEventListener("wheel", (event) => {
     event.preventDefault();
-    camera.zoom = clamp(camera.zoom * (event.deltaY > 0 ? 0.92 : 1.08), camera.minZoom, camera.maxZoom);
+    zoomAt(camera, event.deltaY > 0 ? 0.92 : 1.08, event.clientX, event.clientY);
     onChange();
   }, { passive: false });
 
@@ -54,8 +59,19 @@ export function createCamera(canvas, onChange = () => {}) {
 }
 
 export function zoomCamera(camera, amount, onChange = () => {}) {
-  camera.zoom = clamp(camera.zoom * amount, camera.minZoom, camera.maxZoom);
+  zoomAt(camera, amount, camera.canvas.clientWidth / 2, camera.canvas.clientHeight / 2);
   onChange();
+}
+
+export function zoomAt(camera, amount, screenX, screenY) {
+  const nextZoom = clamp(camera.zoom * amount, camera.minZoom, camera.maxZoom);
+  if (nextZoom === camera.zoom) return;
+
+  const worldX = (screenX - (camera.canvas.clientWidth / 2 + camera.x)) / camera.zoom;
+  const worldY = (screenY - (130 + camera.y)) / camera.zoom;
+  camera.zoom = nextZoom;
+  camera.x = screenX - camera.canvas.clientWidth / 2 - worldX * nextZoom;
+  camera.y = screenY - 130 - worldY * nextZoom;
 }
 
 function point(event) {

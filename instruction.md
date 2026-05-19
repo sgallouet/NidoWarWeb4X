@@ -5,14 +5,7 @@
 - Isometric 3/4 angle tile world map including towns, armies, ressource and terrains
 - Turn by turn 4X game with limited movement and action in the world map for each turn
 - Each armies consist of a hero leader (which have the empire flag) and units (or multiple hero) - in the world map we only see the hero
-- Attacking another armie consist on moving into their tie and enfellow as such :
-    - Game zoom into the 9 tiles surrounding the attcked tile -the others tiles become blac&white - in the center is the army being attacked
-    - All armies present in the 9 tiles would be there
-    - Each tiles have a subdivision of 4 sub tile, with each subtile having one of the unit group / heroes in user pre configred formation 
-        - the attacker can choose to change his formation
-    - Eeach team can battle each other like traditional 4x game with
-        - a team can try to retreat by moving to a border when its turn start before doing any other action
-        - first turn is given to the attacker
+- Attacking another armie consist on having our hero moving into their tie and enfellow battle mode
 - Capturing ressources such as mine or market provide gold on a regular turn schedule
     - On pay turn a merchant is spawn to transport the gold to the nearest castle or town at a speed of 3 tile/turn
         - this merchant can overlap existing friendly unit
@@ -27,6 +20,17 @@
 - Castle can build new units if the correct building was constructed first
 - Town generate +1 population point per week, when an army enter a town they can growth +1 at the end of the turn for each population point the town have.
 - Each day have 5 turn : 6am, 1pm, 4pm, 8pm, 1am
+
+### Rule of the battle mode
+- Game zoom into the 9*9 tiles surrounding the attacked tile -the others tiles become blac&white - in the center is the army being attacked
+- All armies present in the 9 tiles would be there
+- Phase 1 the attacker can choose to change their formation in the 9*9 tiles surronding the hero
+    - units with most hp at the front, units with the most range at the back, some units in the middle to end up with 2-3 rows facing enemy
+- Eeach team can battle each other like traditional 4x game with
+    - a team can try to retreat by moving one units to a border - it then became inactive - only allowed if have more than 40% health left
+    - first turn is given to the attacker
+    - warrior class have assist skill, meaning if you attack an enemy unit and there is an allied warrior next to that unit it will also attack with 20% of his strength (show assist attack with 0.3s delay)
+
 
 
 ## Code design

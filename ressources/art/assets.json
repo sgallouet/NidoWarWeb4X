@@ -6,6 +6,7 @@
     "props": "ressources/atlases/props.png",
     "buildings": "ressources/atlases/buildings.png",
     "units": "ressources/atlases/units-kingdom.png",
+    "mixedUnits": "ressources/atlases/units-mixed.png",
     "castleUprez": "ressources/atlases/castle-uprez.png"
   },
   "tile": {
@@ -1172,6 +1173,383 @@
         }
       }
     },
+    "units.orcBrute": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        429,
+        662,
+        103,
+        109
+      ],
+      "file": "ressources/sprites/units/orc-brute.png",
+      "draw": {
+        "height": 62,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.orcAxe": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        574,
+        656,
+        144,
+        119
+      ],
+      "file": "ressources/sprites/units/orc-axe.png",
+      "draw": {
+        "height": 60,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.goblinKnife": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        750,
+        689,
+        92,
+        81
+      ],
+      "file": "ressources/sprites/units/goblin-knife.png",
+      "draw": {
+        "height": 48,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.skeletonSword": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        35,
+        806,
+        95,
+        99
+      ],
+      "file": "ressources/sprites/units/skeleton-sword.png",
+      "draw": {
+        "height": 52,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.trollClub": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        1014,
+        651,
+        116,
+        124
+      ],
+      "file": "ressources/sprites/units/troll-club.png",
+      "draw": {
+        "height": 66,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.skeletonArcher": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        176,
+        806,
+        75,
+        100
+      ],
+      "file": "ressources/sprites/units/skeleton-archer.png",
+      "draw": {
+        "height": 52,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.zombie": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        313,
+        805,
+        70,
+        104
+      ],
+      "file": "ressources/sprites/units/zombie.png",
+      "draw": {
+        "height": 54,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.ghost": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        435,
+        801,
+        89,
+        107
+      ],
+      "file": "ressources/sprites/units/ghost.png",
+      "draw": {
+        "height": 58,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.vampire": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        575,
+        799,
+        122,
+        114
+      ],
+      "file": "ressources/sprites/units/vampire.png",
+      "draw": {
+        "height": 66,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.demonImp": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        724,
+        815,
+        98,
+        95
+      ],
+      "file": "ressources/sprites/units/demon-imp.png",
+      "draw": {
+        "height": 58,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.minotaur": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        880,
+        792,
+        114,
+        123
+      ],
+      "file": "ressources/sprites/units/minotaur.png",
+      "draw": {
+        "height": 70,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.darkMage": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        1033,
+        793,
+        106,
+        121
+      ],
+      "file": "ressources/sprites/units/dark-mage.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    "units.wolfRaider": {
+      "kind": "unit",
+      "atlas": "mixedUnits",
+      "rect": [
+        1170,
+        810,
+        111,
+        103
+      ],
+      "file": "ressources/sprites/units/wolf-raider.png",
+      "draw": {
+        "height": 64,
+        "anchorX": 0.5,
+        "anchorY": 0.97,
+        "depth": 28,
+        "shadow": true,
+        "flipX": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
     "tiles.grassClean": {
       "kind": "tile",
       "atlas": "terrain",
@@ -1376,5 +1754,5 @@
       "source": "file"
     }
   },
-  "cacheVersion": "hires-forest-2"
+  "cacheVersion": "battle-test-3"
 }
