@@ -1,4 +1,4 @@
-import { BattleManager } from "./battle/BattleManager.js?v=battle-test-43";
+import { BattleManager } from "./battle/BattleManager.js?v=move-path-1";
 
 export const battleManager = new BattleManager();
 

@@ -7,7 +7,8 @@
     "buildings": "ressources/atlases/buildings.png",
     "units": "ressources/atlases/units-kingdom.png",
     "mixedUnits": "ressources/atlases/units-mixed.png",
-    "castleUprez": "ressources/atlases/castle-uprez.png"
+    "castleUprez": "ressources/atlases/castle-uprez.png",
+    "werewolfIdle": "ressources/atlases/werewolve-idle.png"
   },
   "tile": {
     "width": 112,
@@ -1523,16 +1524,106 @@
     },
     "units.wolfRaider": {
       "kind": "unit",
-      "atlas": "mixedUnits",
+      "atlas": "werewolfIdle",
       "rect": [
-        1170,
-        810,
-        111,
-        103
+        0,
+        0,
+        512,
+        512
       ],
       "file": "ressources/sprites/units/wolf-raider.png",
+      "frames": [
+        {
+          "rect": [
+            0,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-0.png"
+        },
+        {
+          "rect": [
+            512,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-1.png"
+        },
+        {
+          "rect": [
+            1024,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-2.png"
+        },
+        {
+          "rect": [
+            1536,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-3.png"
+        },
+        {
+          "rect": [
+            2048,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-4.png"
+        },
+        {
+          "rect": [
+            2560,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-5.png"
+        },
+        {
+          "rect": [
+            3072,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-6.png"
+        },
+        {
+          "rect": [
+            3584,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-7.png"
+        }
+      ],
+      "animations": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameMs": 150
+        }
+      },
+      "defaultAnimation": "idle",
       "draw": {
-        "height": 64,
+        "height": 74,
         "anchorX": 0.5,
         "anchorY": 0.97,
         "depth": 28,
@@ -1754,5 +1845,5 @@
       "source": "file"
     }
   },
-  "cacheVersion": "battle-test-3"
+  "cacheVersion": "battle-test-4"
 }

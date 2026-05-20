@@ -64,3 +64,8 @@ For every new durable rule in this repo:
 - NW-R046: Keep a project skill Don't Do List for repeated mistakes or failed approaches that are worth remembering.
 - NW-R047: Some warrior units can have leveled counter traits that hit back only when melee attacked, scaling from 20% to 50% of their current damage.
 - NW-R048: Large terrain/render cache rebuilds should be chunked asynchronously instead of built synchronously in one main-thread lump.
+- NW-R049: Battle unit selection panels should sit at the bottom-left of the screen.
+- NW-R050: Battle HUD unit selection must work the same during preparation and battle phases.
+- NW-R051: Clicking trait icons is informational and must not spend or trigger a unit attack.
+- NW-R052: In battle mode, the End button ends the player side's turn and passes control to the enemy side.
+- NW-R053: Battle movement animations should travel tile-to-tile, may use diagonal steps, should avoid blocked/occupied tiles when possible, and should keep visually consistent speed.

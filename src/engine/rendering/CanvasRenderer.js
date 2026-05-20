@@ -3,6 +3,8 @@ import { TILE_STATE } from "./tileStates.js?v=battle-test-43";
 
 const BATTLE_RADIUS = 4;
 const CACHE_PADDING = 620;
+const MOVE_PATH_SPEED = 0.48;
+const CACHE_BUILD_BUDGET_MS = 1.2;
 
 export class CanvasRenderer {
   constructor(canvas, camera, scene, art, { performanceMonitor = null } = {}) {
@@ -15,10 +17,16 @@ export class CanvasRenderer {
     this.groundCache = null;
     this.groundCacheKey = "";
     this.groundBuildPending = false;
+    this.propCache = null;
+    this.propCacheKey = "";
+    this.propBuildPending = false;
+    this.backdropCache = null;
+    this.backdropCacheKey = "";
     this.propDrawables = [];
     this.tintedTileCache = new Map();
     this.performanceMonitor = performanceMonitor;
     this.frameRequested = false;
+    this.animatedSpriteTimer = null;
     this.lastStats = { total: 0, ground: 0, props: 0, units: 0, floaters: 0, cachedGround: false };
     this.pixelRatio = 1;
     window.addEventListener("resize", () => this.requestRender());
@@ -32,6 +40,7 @@ export class CanvasRenderer {
   rebuildStatic() {
     this.propDrawables = this.createPropDrawables();
     this.invalidateGround();
+    this.invalidateProps();
     this.requestRender();
   }
 
@@ -51,7 +60,7 @@ export class CanvasRenderer {
     let diagonal = 0;
     const buildChunk = () => {
       const chunkStart = performance.now();
-      while (diagonal <= maxDiagonal && performance.now() - chunkStart < 4) {
+      while (diagonal <= maxDiagonal && performance.now() - chunkStart < CACHE_BUILD_BUDGET_MS) {
         this.drawGroundDiagonal(context, battle, null, diagonal);
         diagonal += 1;
       }
@@ -88,7 +97,7 @@ export class CanvasRenderer {
     context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
     context.imageSmoothingEnabled = true;
     context.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
-    drawBackdrop(context, this.canvas.clientWidth, this.canvas.clientHeight);
+    this.drawBackdrop(context, this.canvas.clientWidth, this.canvas.clientHeight);
 
     const translateX = this.canvas.clientWidth / 2 + this.camera.x;
     const translateY = 130 + this.camera.y;
@@ -168,6 +177,15 @@ export class CanvasRenderer {
     const sw = Math.max(1, ex - sx);
     const sh = Math.max(1, ey - sy);
     this.context.drawImage(cache.canvas, sx, sy, sw, sh, cache.x + sx, cache.y + sy, sw, sh);
+  }
+
+  drawBackdrop(context, width, height) {
+    const cacheKey = `${Math.ceil(width)}x${Math.ceil(height)}`;
+    if (!this.backdropCache || this.backdropCacheKey !== cacheKey) {
+      this.backdropCache = createBackdrop(width, height);
+      this.backdropCacheKey = cacheKey;
+    }
+    context.drawImage(this.backdropCache, 0, 0, width, height);
   }
 
   drawGroundTiles(target, battle, bounds) {
@@ -253,20 +271,73 @@ export class CanvasRenderer {
   }
 
   drawVisibleProps(bounds, battle) {
+    const key = this.propStateKey(battle);
+    if (this.propCache && this.propCacheKey === key) {
+      this.drawCacheLayer(this.propCache, bounds);
+      return;
+    }
+    this.schedulePropBuild();
+    if (this.propCache) {
+      this.drawCacheLayer(this.propCache, bounds);
+      return;
+    }
     const actors = this.coverActors(battle);
     for (const drawable of this.propDrawables) {
       if (this.drawableOutsideBounds(drawable, bounds)) continue;
-      const presentation = this.propPresentation(drawable, actors);
-      this.drawSprite(
-        this.context,
-        drawable.position.x + drawable.item.dx + presentation.offset.x,
-        drawable.position.y + drawable.item.dy + presentation.offset.y,
-        drawable.asset,
-        1,
-        presentation.alpha,
-        this.propFilter(drawable.tile, battle),
-      );
+      this.drawPropDrawable(this.context, drawable, battle, actors);
     }
+  }
+
+  invalidateProps() {
+    this.propCacheKey = "";
+    this.schedulePropBuild();
+  }
+
+  schedulePropBuild() {
+    if (this.propBuildPending) return;
+    this.propBuildPending = true;
+    const battle = this.scene.battle;
+    const key = this.propStateKey(battle);
+    const actors = this.coverActors(battle);
+    const cache = this.createEmptyGroundCache();
+    const context = cache.canvas.getContext("2d", { alpha: true });
+    let index = 0;
+    const buildChunk = () => {
+      const chunkStart = performance.now();
+      while (index < this.propDrawables.length && performance.now() - chunkStart < CACHE_BUILD_BUDGET_MS) {
+        this.drawPropDrawable(context, this.propDrawables[index], battle, actors);
+        index += 1;
+      }
+      if (index < this.propDrawables.length) {
+        setTimeout(buildChunk, 0);
+        return;
+      }
+      this.propBuildPending = false;
+      if (key === this.propStateKey(this.scene.battle)) {
+        this.propCache = cache;
+        this.propCacheKey = key;
+        this.requestRender();
+        return;
+      }
+      this.schedulePropBuild();
+    };
+    setTimeout(() => {
+      context.translate(-cache.x, -cache.y);
+      buildChunk();
+    }, 0);
+  }
+
+  drawPropDrawable(target, drawable, battle, actors) {
+    const presentation = this.propPresentation(drawable, actors);
+    this.drawSprite(
+      target,
+      drawable.position.x + drawable.item.dx + presentation.offset.x,
+      drawable.position.y + drawable.item.dy + presentation.offset.y,
+      drawable.asset,
+      1,
+      presentation.alpha,
+      this.propFilter(drawable.tile, battle),
+    );
   }
 
   createPropDrawables() {
@@ -384,7 +455,7 @@ export class CanvasRenderer {
 
   drawSprite(target, x, y, asset, scale = 1, alpha = 1, filter = "none") {
     const draw = asset.draw;
-    const image = asset.image;
+    const image = this.spriteImage(asset);
     const height = draw.height * scale;
     const width = (draw.width ?? Math.round(image.width * (draw.height / image.height))) * scale;
     target.save();
@@ -400,6 +471,25 @@ export class CanvasRenderer {
     }
     target.drawImage(image, x - width * (draw.anchorX ?? 0.5), y - height * (draw.anchorY ?? 1), width, height);
     target.restore();
+  }
+
+  spriteImage(asset) {
+    if (!asset.frames?.length) return asset.image;
+    const animation = asset.animations?.[asset.defaultAnimation] ?? asset.animations?.idle;
+    const frameIds = animation?.frames?.length ? animation.frames : asset.frames.map((_, index) => index);
+    const frameMs = animation?.frameMs ?? 160;
+    const now = performance.now();
+    const frameId = frameIds[Math.floor(now / frameMs) % frameIds.length] ?? 0;
+    this.scheduleAnimatedSpriteRender(frameMs - (now % frameMs) + 1);
+    return asset.frames[frameId]?.image ?? asset.image;
+  }
+
+  scheduleAnimatedSpriteRender(delay) {
+    if (this.animatedSpriteTimer) return;
+    this.animatedSpriteTimer = window.setTimeout(() => {
+      this.animatedSpriteTimer = null;
+      this.requestRender();
+    }, Math.max(16, delay));
   }
 
   drawShadow(target, x, y, width) {
@@ -442,6 +532,16 @@ export class CanvasRenderer {
       this.requestRender();
       return this.shakenPosition(unit, position);
     }
+    if (animation.kind === "move" && animation.path?.length > 1) {
+      const metrics = this.pathMetrics(animation);
+      if (elapsed >= metrics.duration) {
+        delete unit.animation;
+        return this.shakenPosition(unit, position);
+      }
+      this.requestRender();
+      return this.shakenPosition(unit, this.pathPosition(metrics, elapsed));
+    }
+
     const progress = Math.min(1, elapsed / animation.duration);
     if (progress >= 1) {
       delete unit.animation;
@@ -460,6 +560,39 @@ export class CanvasRenderer {
     }
     this.requestRender();
     return this.shakenPosition(unit, position);
+  }
+
+  pathMetrics(animation) {
+    if (animation.pathMetrics) return animation.pathMetrics;
+    const points = animation.path.map((tile) => this.centerFor(tile.x, tile.y));
+    const segments = [];
+    let length = 0;
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const segmentLength = pointDistance(points[index], points[index + 1]);
+      segments.push(segmentLength);
+      length += segmentLength;
+    }
+    animation.pathMetrics = {
+      duration: Math.max(80, length / MOVE_PATH_SPEED),
+      points,
+      segments,
+    };
+    return animation.pathMetrics;
+  }
+
+  pathPosition(metrics, elapsed) {
+    let remaining = elapsed * MOVE_PATH_SPEED;
+    for (let index = 0; index < metrics.segments.length; index += 1) {
+      const from = metrics.points[index];
+      const to = metrics.points[index + 1];
+      const length = metrics.segments[index];
+      if (remaining <= length) {
+        const amount = length > 0 ? remaining / length : 1;
+        return { x: mix(from.x, to.x, amount), y: mix(from.y, to.y, amount) };
+      }
+      remaining -= length;
+    }
+    return metrics.points[metrics.points.length - 1];
   }
 
   shakenPosition(unit, position) {
@@ -605,35 +738,62 @@ function setKey(set) {
 
 CanvasRenderer.prototype.groundStateKey = function groundStateKey() {
   const battle = this.scene.battle;
+  const keys = this.scene.renderKeys;
   if (battle) {
     return [
       "battle",
       battle.phase,
       battle.center.x,
       battle.center.y,
-      setKey(this.scene.battleMoves),
-      setKey(this.scene.battleGuards),
-      setKey(this.scene.battleAttacks),
+      keys?.battleMoves ?? setKey(this.scene.battleMoves),
+      keys?.battleGuards ?? setKey(this.scene.battleGuards),
+      keys?.battleAttacks ?? setKey(this.scene.battleAttacks),
     ].join("|");
   }
   return [
     "world",
-    setKey(this.scene.reachable),
-    setKey(this.scene.engageTiles),
-    setKey(this.scene.worldAttackTiles),
+    keys?.reachable ?? setKey(this.scene.reachable),
+    keys?.engageTiles ?? setKey(this.scene.engageTiles),
+    keys?.worldAttackTiles ?? setKey(this.scene.worldAttackTiles),
   ].join("|");
+};
+
+CanvasRenderer.prototype.propStateKey = function propStateKey(battle = this.scene.battle) {
+  const actors = this.scene.renderKeys?.actors ?? this.coverActors(battle)
+    .map((actor) => `${actor.id ?? actor.armyId ?? actor.sprite}:${actor.x},${actor.y}:${actor.hp ?? ""}:${actor.inactive ? 1 : 0}`)
+    .sort()
+    .join(";");
+  if (battle) {
+    return [
+      "battle-props",
+      battle.phase,
+      battle.center.x,
+      battle.center.y,
+      actors,
+    ].join("|");
+  }
+  return ["world-props", actors].join("|");
 };
 
 function mix(start, end, amount) {
   return start + (end - start) * amount;
 }
 
-function drawBackdrop(context, width, height) {
+function pointDistance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function createBackdrop(width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.ceil(width));
+  canvas.height = Math.max(1, Math.ceil(height));
+  const context = canvas.getContext("2d", { alpha: true });
   const gradient = context.createLinearGradient(0, 0, 0, height);
   gradient.addColorStop(0, "#263a42");
   gradient.addColorStop(1, "#121820");
   context.fillStyle = gradient;
   context.fillRect(0, 0, width, height);
+  return canvas;
 }
 
 function isTree(item) {

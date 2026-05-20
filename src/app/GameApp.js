@@ -4,9 +4,9 @@ import { HudController } from "./HudController.js?v=battle-test-43";
 import { InputController } from "./InputController.js?v=battle-test-43";
 import { loadArtCatalog } from "../engine/artCatalog.js";
 import { createCamera } from "../engine/camera.js";
-import { applyTileCenters, createIso, screenToTile, worldToScreen } from "../engine/iso.js?v=battle-test-43";
-import { createRenderer } from "../engine/renderer.js?v=battle-test-43";
-import { activeCombatant, battleAttackTiles, battleGuardTiles, battleMoveTiles, handleBattleTap, isEnemyTurn, renameUnit, resolveEnemyTurn, selectUnit, waitBattleTurn } from "../gameplay/battleActions.js?v=battle-test-43";
+import { applyTileCenters, createIso, screenToTile, worldToScreen } from "../engine/iso.js?v=tile-pick-1";
+import { createRenderer } from "../engine/renderer.js?v=perf-cache-1";
+import { activeCombatant, battleAttackTiles, battleGuardTiles, battleMoveTiles, handleBattleTap, isEnemyTurn, renameUnit, resolveEnemyTurn, selectUnit, waitBattleTurn } from "../gameplay/battleActions.js?v=move-path-1";
 import { attackableArmyTiles, engageTiles, handleTileTap, reachableTiles } from "../gameplay/worldActions.js?v=battle-test-43";
 import { createScene } from "../universe/map.js?v=battle-test-43";
 import { PerformanceMonitor } from "../ui/PerformanceMonitor.js?v=battle-test-43";
@@ -95,7 +95,7 @@ export class GameApp {
 
   handleTap(screenX, screenY) {
     const tile = this.scene.battle
-      ? screenToTile(screenX, screenY, this.canvas, this.camera, this.iso, this.scene)
+      ? screenToTile(screenX, screenY, this.canvas, this.camera, this.iso, this.scene, this.artCatalog)
       : this.selectedWorldTile(screenX, screenY);
     const result = this.scene.battle ? handleBattleTap(this.scene, tile) : handleTileTap(this.scene, tile);
     this.refreshAfterAction();
@@ -129,7 +129,6 @@ export class GameApp {
   refreshAfterAction() {
     this.refreshTacticalSets();
     this.hud.update(this.scene);
-    this.renderer.invalidateGround();
     this.renderer.requestRender();
   }
 
@@ -149,7 +148,7 @@ export class GameApp {
   selectedWorldTile(screenX, screenY) {
     const hit = this.armyHit(screenX, screenY);
     if (hit) return { x: hit.x, y: hit.y };
-    return screenToTile(screenX, screenY, this.canvas, this.camera, this.iso, this.scene);
+    return screenToTile(screenX, screenY, this.canvas, this.camera, this.iso, this.scene, this.artCatalog);
   }
 
   armyHit(screenX, screenY) {
@@ -181,6 +180,15 @@ export class GameApp {
     this.scene.battleMoves = playerControl ? battleMoveTiles(this.scene.battle) : new Set();
     this.scene.battleGuards = playerControl ? battleGuardTiles(this.scene.battle) : new Set();
     this.scene.battleAttacks = playerControl ? battleAttackTiles(this.scene.battle) : new Set();
+    this.scene.renderKeys = {
+      actors: actorRenderKey(this.scene),
+      battleAttacks: setRenderKey(this.scene.battleAttacks),
+      battleGuards: setRenderKey(this.scene.battleGuards),
+      battleMoves: setRenderKey(this.scene.battleMoves),
+      engageTiles: setRenderKey(this.scene.engageTiles),
+      reachable: setRenderKey(this.scene.reachable),
+      worldAttackTiles: setRenderKey(this.scene.worldAttackTiles),
+    };
   }
 
   scheduleEnemyTurns() {
@@ -196,4 +204,21 @@ export class GameApp {
   tileAt(x, y) {
     return this.scene.tileset?.at(x, y) ?? this.scene.tiles[y * this.scene.size + x];
   }
+}
+
+function setRenderKey(set) {
+  return [...(set ?? new Set())].sort().join(";");
+}
+
+function actorRenderKey(scene) {
+  const battle = scene.battle;
+  const actors = battle
+    ? battle.combatants.filter((combatant) => (battle.phase !== "preparation" || combatant.side === "player")
+      && combatant.hp > 0
+      && !combatant.inactive)
+    : scene.armies;
+  return actors
+    .map((actor) => `${actor.id ?? actor.armyId ?? actor.sprite}:${actor.x},${actor.y}:${actor.hp ?? ""}:${actor.inactive ? 1 : 0}`)
+    .sort()
+    .join(";");
 }

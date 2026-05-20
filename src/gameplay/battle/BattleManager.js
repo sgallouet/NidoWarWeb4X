@@ -60,7 +60,7 @@ export class BattleManager {
         return { type: "retreated", combatant: active };
       }
 
-      this.moveUnit(active, tile, 360);
+      this.moveUnit(battle, active, tile, 360);
       active.attackUnavailable = !this.canStillAttack(battle, active);
       return { type: "battle-moved", combatant: active, endedTurn: active.inactive };
     }
@@ -74,7 +74,7 @@ export class BattleManager {
       this.startBattle(scene);
       return;
     }
-    this.advanceTurn(scene.battle);
+    this.endPlayerTurn(scene.battle);
   }
 
   startBattle(scene) {
@@ -110,7 +110,7 @@ export class BattleManager {
 
     const nearest = this.nearestTarget(battle, active, "player");
     const destination = nearest && this.bestMoveToward(battle, active, nearest);
-    if (destination) this.moveUnit(active, destination, 360);
+    if (destination) this.moveUnit(battle, active, destination, 360);
 
     const movedTarget = this.nearestAttackTarget(battle, active);
     if (movedTarget) return this.performAttack(battle, active, movedTarget, "enemy-attacked");
@@ -120,7 +120,12 @@ export class BattleManager {
 
   selectUnit(battle, unitId) {
     const unit = battle?.combatants.find((combatant) => combatant.id === unitId && combatant.hp > 0 && !combatant.inactive);
-    if (!unit || unit.side !== "player" || !this.playerCanAct(battle)) return { type: "blocked" };
+    if (!unit || unit.side !== "player") return { type: "blocked" };
+    if (battle.phase === "preparation") {
+      battle.activeId = unit.id;
+      return { type: "prep-selected", combatant: unit };
+    }
+    if (!this.playerCanAct(battle)) return { type: "blocked" };
     battle.activeId = unit.id;
     return { type: "battle-selected", combatant: unit };
   }
@@ -181,7 +186,7 @@ export class BattleManager {
     if (!active || active.side !== "player" || target || !this.inDeployment(battle, tile) || this.tileBlocked(battle, tile.x, tile.y)) {
       return this.clearSelection(battle);
     }
-    this.moveUnit(active, tile, 260);
+    this.moveUnit(battle, active, tile, 260);
     return { type: "prep-moved", combatant: active };
   }
 
@@ -317,16 +322,18 @@ export class BattleManager {
       && distance(unit, target) === 1);
   }
 
-  moveUnit(unit, tile, duration) {
+  moveUnit(battle, unit, tile, duration) {
     if (unit.originX === undefined || unit.originY === undefined) {
       unit.originX = unit.x;
       unit.originY = unit.y;
     }
+    const path = this.movementPath(battle, unit, tile);
     unit.animation = {
       duration,
       fromX: unit.x,
       fromY: unit.y,
       kind: "move",
+      path,
       started: performance.now(),
       toX: tile.x,
       toY: tile.y,
@@ -338,26 +345,58 @@ export class BattleManager {
   }
 
   retreatUnit(battle, unit, tile) {
-    this.moveUnit(unit, tile, 320);
+    this.moveUnit(battle, unit, tile, 320);
     unit.inactive = true;
     unit.retreating = true;
     this.advanceTurn(battle);
   }
 
+  endPlayerTurn(battle) {
+    for (const unit of this.living(battle, "player")) {
+      unit.moved = true;
+      unit.attacked = true;
+      unit.attackUnavailable = false;
+    }
+    for (const unit of this.living(battle, "enemy")) this.resetCombatantTurn(unit);
+    const nextEnemy = this.living(battle, "enemy").find((unit) => this.hasActionRemaining(battle, unit));
+    if (nextEnemy) {
+      battle.activeId = nextEnemy.id;
+      battle.turn += 1;
+      return;
+    }
+    this.startPlayerTurn(battle);
+  }
+
+  startPlayerTurn(battle) {
+    battle.round += 1;
+    battle.turn += 1;
+    for (const unit of this.living(battle, "player")) this.resetCombatantTurn(unit);
+    battle.activeId = this.living(battle, "player")[0]?.id ?? battle.activeId;
+  }
+
   advanceTurn(battle) {
     const alive = battle.combatants.filter((combatant) => combatant.hp > 0 && !combatant.inactive);
     if (!alive.length) return;
+    const previous = this.activeCombatant(battle);
     let index = alive.findIndex((combatant) => combatant.id === battle.activeId);
     index = (index + 1) % alive.length;
+    if (alive[index].side === "player" && previous?.side === "enemy") {
+      this.startPlayerTurn(battle);
+      return;
+    }
     if (index === 0) battle.round += 1;
     battle.turn += 1;
     battle.activeId = alive[index].id;
-    alive[index].moved = false;
-    alive[index].attacked = false;
-    alive[index].attackCount = 0;
-    alive[index].attackUnavailable = false;
-    alive[index].originX = alive[index].x;
-    alive[index].originY = alive[index].y;
+    this.resetCombatantTurn(alive[index]);
+  }
+
+  resetCombatantTurn(combatant) {
+    combatant.moved = false;
+    combatant.attacked = false;
+    combatant.attackCount = 0;
+    combatant.attackUnavailable = false;
+    combatant.originX = combatant.x;
+    combatant.originY = combatant.y;
   }
 
   canMove(battle, combatant, tile) {
@@ -464,22 +503,53 @@ export class BattleManager {
     const reached = new Set();
     if (combatant.attacked || combatant.attackCount > 0) return reached;
     const origin = { x: combatant.originX ?? combatant.x, y: combatant.originY ?? combatant.y };
+    if ((origin.x !== combatant.x || origin.y !== combatant.y)
+      && this.inBattleBounds(battle, origin)
+      && !this.tileBlocked(battle, origin.x, origin.y)
+      && !this.combatantAt(battle, origin.x, origin.y)) {
+      reached.add(key(origin.x, origin.y));
+    }
     const visited = new Set([key(origin.x, origin.y)]);
     const queue = [{ ...origin, distance: 0 }];
     for (let index = 0; index < queue.length; index += 1) {
       const current = queue[index];
       if (current.distance >= combatant.move) continue;
       if (current.distance > 0 && this.isInWarriorBlockZone(battle, combatant, current)) continue;
-      for (const next of neighbors(current)) {
+      for (const next of movementNeighbors(current)) {
         const nextKey = key(next.x, next.y);
         if (visited.has(nextKey) || !this.inBattleBounds(battle, next)) continue;
-        if (this.tileBlocked(battle, next.x, next.y) || this.combatantAt(battle, next.x, next.y)) continue;
+        const occupant = this.combatantAt(battle, next.x, next.y);
+        if (this.tileBlocked(battle, next.x, next.y) || (occupant && occupant.id !== combatant.id)) continue;
         visited.add(nextKey);
         reached.add(nextKey);
         queue.push({ ...next, distance: current.distance + 1 });
       }
     }
     return reached;
+  }
+
+  movementPath(battle, combatant, destination) {
+    const start = { x: combatant.x, y: combatant.y };
+    const targetKey = key(destination.x, destination.y);
+    if (key(start.x, start.y) === targetKey) return [start];
+
+    const visited = new Set([key(start.x, start.y)]);
+    const previous = new Map();
+    const queue = [start];
+    for (let index = 0; index < queue.length; index += 1) {
+      const current = queue[index];
+      for (const next of movementNeighbors(current, destination)) {
+        const nextKey = key(next.x, next.y);
+        if (visited.has(nextKey) || !this.inBattleBounds(battle, next)) continue;
+        const occupant = this.combatantAt(battle, next.x, next.y);
+        if (this.tileBlocked(battle, next.x, next.y) || (occupant && occupant.id !== combatant.id)) continue;
+        visited.add(nextKey);
+        previous.set(nextKey, key(current.x, current.y));
+        if (nextKey === targetKey) return buildPath(previous, start, destination);
+        queue.push(next);
+      }
+    }
+    return [start, { x: destination.x, y: destination.y }];
   }
 
   isInWarriorBlockZone(battle, combatant, tile) {
@@ -532,6 +602,19 @@ function key(x, y) {
   return `${x},${y}`;
 }
 
+function buildPath(previous, start, destination) {
+  const path = [{ x: destination.x, y: destination.y }];
+  let cursor = key(destination.x, destination.y);
+  const startKey = key(start.x, start.y);
+  while (cursor !== startKey) {
+    cursor = previous.get(cursor);
+    if (!cursor) return [start, { x: destination.x, y: destination.y }];
+    const [x, y] = cursor.split(",").map(Number);
+    path.push({ x, y });
+  }
+  return path.reverse();
+}
+
 function distance(a, b) {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
@@ -548,4 +631,20 @@ function neighbors(tile) {
     { x: tile.x, y: tile.y + 1 },
     { x: tile.x, y: tile.y - 1 },
   ];
+}
+
+function movementNeighbors(tile, destination = null) {
+  const candidates = [
+    { x: tile.x + 1, y: tile.y },
+    { x: tile.x - 1, y: tile.y },
+    { x: tile.x, y: tile.y + 1 },
+    { x: tile.x, y: tile.y - 1 },
+    { x: tile.x + 1, y: tile.y + 1 },
+    { x: tile.x + 1, y: tile.y - 1 },
+    { x: tile.x - 1, y: tile.y + 1 },
+    { x: tile.x - 1, y: tile.y - 1 },
+  ];
+  return destination
+    ? candidates.sort((a, b) => distance(a, destination) - distance(b, destination))
+    : candidates;
 }

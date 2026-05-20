@@ -35,6 +35,7 @@ export class HudController {
   handleTraitClick(event) {
     const target = event.target.closest("[data-trait]");
     if (!target) return false;
+    event.preventDefault();
     event.stopPropagation();
     this.showTraitInfo(target.dataset.trait);
     return true;

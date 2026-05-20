@@ -31,13 +31,16 @@ export function applyTileCenters(scene, iso) {
   }
 }
 
-export function screenToTile(screenX, screenY, canvas, camera, iso, scene) {
+export function screenToTile(screenX, screenY, canvas, camera, iso, scene, art = null) {
   const world = screenToWorld(screenX, screenY, canvas, camera);
   const surfaceY = world.y - iso.objectOffsetY;
   const rawX = surfaceY / iso.tileHeight + world.x / iso.tileWidth;
   const rawY = surfaceY / iso.tileHeight - world.x / iso.tileWidth;
   const baseX = Math.round(rawX);
   const baseY = Math.round(rawY);
+  const spriteHit = art && spriteTileHit(world, baseX, baseY, scene, art);
+  if (spriteHit) return spriteHit;
+
   let best = { x: baseX, y: baseY, score: Infinity };
 
   for (let y = baseY - 1; y <= baseY + 1; y += 1) {
@@ -52,6 +55,56 @@ export function screenToTile(screenX, screenY, canvas, camera, iso, scene) {
   }
 
   return { x: best.x, y: best.y };
+}
+
+function spriteTileHit(world, baseX, baseY, scene, art) {
+  let best = null;
+  for (let y = baseY - 3; y <= baseY + 3; y += 1) {
+    for (let x = baseX - 3; x <= baseX + 3; x += 1) {
+      if (scene && (x < 0 || y < 0 || x >= scene.size || y >= scene.size)) continue;
+      const tile = tileAt(scene, x, y);
+      const asset = tile && art.assets?.[tile.sprite];
+      if (!asset || asset.kind !== "tile" || !asset.image) continue;
+      const alpha = tileSpriteAlphaAt(asset, tile, world);
+      if (alpha < 10) continue;
+      const order = (x + y) * scene.size + x;
+      if (!best || order > best.order || (order === best.order && alpha > best.alpha)) {
+        best = { alpha, order, x, y };
+      }
+    }
+  }
+  return best ? { x: best.x, y: best.y } : null;
+}
+
+function tileSpriteAlphaAt(asset, tile, world) {
+  const draw = asset.draw;
+  const origin = tile.origin;
+  if (!draw || !origin) return 0;
+  const left = origin.x - draw.width * draw.anchorX;
+  const top = origin.y - draw.height * draw.anchorY;
+  if (world.x < left || world.x >= left + draw.width || world.y < top || world.y >= top + draw.height) return 0;
+  const data = pickData(asset);
+  if (!data) return 0;
+  const px = Math.floor(((world.x - left) / draw.width) * data.width);
+  const py = Math.floor(((world.y - top) / draw.height) * data.height);
+  if (px < 0 || py < 0 || px >= data.width || py >= data.height) return 0;
+  return data.alpha[(py * data.width + px) * 4 + 3] ?? 0;
+}
+
+function pickData(asset) {
+  if (asset.pickData) return asset.pickData;
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = asset.image.naturalWidth || asset.image.width;
+  canvas.height = asset.image.naturalHeight || asset.image.height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.drawImage(asset.image, 0, 0);
+  asset.pickData = {
+    alpha: context.getImageData(0, 0, canvas.width, canvas.height).data,
+    height: canvas.height,
+    width: canvas.width,
+  };
+  return asset.pickData;
 }
 
 export function screenToWorld(screenX, screenY, canvas, camera) {

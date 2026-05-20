@@ -215,12 +215,12 @@ canvas {
 
 .health-strip {
   position: fixed;
-  top: max(78px, calc(env(safe-area-inset-top) + 78px));
-  right: max(12px, env(safe-area-inset-right));
   left: max(12px, env(safe-area-inset-left));
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: max(88px, 28vw);
+  bottom: max(74px, calc(env(safe-area-inset-bottom) + 74px));
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: min(620px, calc(100vw - 24px));
   pointer-events: none;
 }
 
@@ -232,12 +232,11 @@ canvas {
   display: grid;
   gap: 5px;
   min-width: 0;
-  max-width: min(230px, 38vw);
+  width: min(230px, 42vw);
   pointer-events: auto;
 }
 
 .unit-panel.is-enemy {
-  justify-self: end;
   text-align: right;
 }
 
@@ -522,12 +521,13 @@ button:focus-visible {
   }
 
   .health-strip {
-    top: max(68px, calc(env(safe-area-inset-top) + 68px));
-    gap: 10px;
+    bottom: max(64px, calc(env(safe-area-inset-bottom) + 64px));
+    gap: 6px;
+    max-width: calc(100vw - 24px);
   }
 
   .unit-panel {
-    max-width: calc(50vw - 17px);
+    width: calc(50vw - 15px);
   }
 
   .health-token {
