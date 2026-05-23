@@ -8,7 +8,8 @@
     "units": "ressources/atlases/units-kingdom.png",
     "mixedUnits": "ressources/atlases/units-mixed.png",
     "castleUprez": "ressources/atlases/castle-uprez.png",
-    "werewolfIdle": "ressources/atlases/werewolve-idle.png"
+    "werewolfIdle": "ressources/atlases/werewolve-idle.png",
+    "werewolfWalk": "ressources/atlases/werewolve-walk.png"
   },
   "tile": {
     "width": 112,
@@ -196,12 +197,12 @@
       "kind": "tile",
       "atlas": "terrain",
       "rect": [
-        40,
-        421,
-        155,
-        133
+        0,
+        0,
+        0,
+        0
       ],
-      "file": "ressources/sprites/tiles/water.png",
+      "file": "ressources/sprites/tiles/highres/water-cube.png",
       "draw": {
         "width": 152,
         "height": 104,
@@ -218,18 +219,48 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
+    },
+    "tiles.deepWater": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/water-deep-cube.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
     },
     "tiles.shore": {
       "kind": "tile",
       "atlas": "terrain",
       "rect": [
-        637,
-        421,
-        142,
-        133
+        0,
+        0,
+        0,
+        0
       ],
-      "file": "ressources/sprites/tiles/shore.png",
+      "file": "ressources/sprites/tiles/highres/island-water-2.png",
       "draw": {
         "width": 152,
         "height": 104,
@@ -246,7 +277,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "tiles.farm": {
       "kind": "tile",
@@ -500,7 +532,37 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
+    },
+    "props.rockStack": {
+      "kind": "prop",
+      "atlas": "props",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/props/rock-stack.png",
+      "draw": {
+        "height": 154,
+        "anchorX": 0.5,
+        "anchorY": 0.92,
+        "depth": 30,
+        "shadow": true
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
     },
     "props.blueBanner": {
       "kind": "prop",
@@ -1201,7 +1263,182 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
+    },
+    "tiles.islandWater": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/island-water.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.islandGround": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/island-ground.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.island": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/island.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.pond": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/pond.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.grassBlock": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/grass-block.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
+    },
+    "tiles.groundBlock": {
+      "kind": "tile",
+      "atlas": "terrain",
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "file": "ressources/sprites/tiles/highres/ground-block.png",
+      "draw": {
+        "width": 152,
+        "height": 104,
+        "anchorX": 0.5,
+        "anchorY": 0.62,
+        "depth": 0
+      },
+      "placement": {
+        "footprint": {
+          "width": 1,
+          "height": 1
+        },
+        "center": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "source": "file"
     },
     "units.orcAxe": {
       "kind": "unit",
@@ -1230,7 +1467,8 @@
           "x": 0,
           "y": 0
         }
-      }
+      },
+      "source": "file"
     },
     "units.goblinKnife": {
       "kind": "unit",
@@ -1604,6 +1842,162 @@
             512
           ],
           "file": "ressources/sprites/units/wolf-raider-idle-7.png"
+        },
+        {
+          "rect": [
+            4096,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-8.png"
+        },
+        {
+          "rect": [
+            4608,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-9.png"
+        },
+        {
+          "rect": [
+            5120,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-10.png"
+        },
+        {
+          "rect": [
+            5632,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-idle-11.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            0,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-0.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            512,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-1.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            1024,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-2.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            1536,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-3.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            2048,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-4.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            2560,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-5.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            3072,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-6.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            3584,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-7.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            4096,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-8.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            4608,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-9.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            5120,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-10.png"
+        },
+        {
+          "atlas": "werewolfWalk",
+          "rect": [
+            5632,
+            0,
+            512,
+            512
+          ],
+          "file": "ressources/sprites/units/wolf-raider-walk-11.png"
         }
       ],
       "animations": {
@@ -1616,9 +2010,30 @@
             4,
             5,
             6,
-            7
+            7,
+            8,
+            9,
+            10,
+            11
           ],
           "frameMs": 150
+        },
+        "walk": {
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "frameMs": 90
         }
       },
       "defaultAnimation": "idle",
@@ -1845,5 +2260,5 @@
       "source": "file"
     }
   },
-  "cacheVersion": "battle-test-4"
+  "cacheVersion": "world-water-hills-1"
 }

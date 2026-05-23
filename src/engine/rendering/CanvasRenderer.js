@@ -12,6 +12,12 @@ export class CanvasRenderer {
     this.camera = camera;
     this.scene = scene;
     this.art = art;
+    this.staticCanvas = document.createElement("canvas");
+    this.staticCanvas.className = "world-static";
+    this.staticCanvas.setAttribute("aria-hidden", "true");
+    this.staticCanvas.style.pointerEvents = "none";
+    this.canvas.before(this.staticCanvas);
+    this.staticContext = this.staticCanvas.getContext("2d", { alpha: true });
     this.context = canvas.getContext("2d", { alpha: true });
     this.iso = createIso(art);
     this.groundCache = null;
@@ -25,9 +31,12 @@ export class CanvasRenderer {
     this.propDrawables = [];
     this.tintedTileCache = new Map();
     this.performanceMonitor = performanceMonitor;
+    this.cacheBuildStats = { ground: 0, props: 0 };
+    this.staticLayerDirty = true;
+    this.staticLayerKey = "";
     this.frameRequested = false;
     this.animatedSpriteTimer = null;
-    this.lastStats = { total: 0, ground: 0, props: 0, units: 0, floaters: 0, cachedGround: false };
+    this.lastStats = { total: 0, static: 0, dynamic: 0, ground: 0, props: 0, units: 0, floaters: 0, cachedGround: false };
     this.pixelRatio = 1;
     window.addEventListener("resize", () => this.requestRender());
   }
@@ -46,6 +55,7 @@ export class CanvasRenderer {
 
   invalidateGround() {
     this.groundCacheKey = "";
+    this.staticLayerDirty = true;
     this.scheduleGroundBuild();
   }
 
@@ -58,12 +68,24 @@ export class CanvasRenderer {
     const context = cache.canvas.getContext("2d", { alpha: true });
     const maxDiagonal = (this.scene.size - 1) * 2;
     let diagonal = 0;
+    let x = 0;
     const buildChunk = () => {
       const chunkStart = performance.now();
       while (diagonal <= maxDiagonal && performance.now() - chunkStart < CACHE_BUILD_BUDGET_MS) {
-        this.drawGroundDiagonal(context, battle, null, diagonal);
-        diagonal += 1;
+        const minX = Math.max(0, diagonal - this.scene.size + 1);
+        const maxX = Math.min(this.scene.size - 1, diagonal);
+        if (x < minX) x = minX;
+        if (x > maxX) {
+          diagonal += 1;
+          x = Math.max(0, diagonal - this.scene.size + 1);
+          continue;
+        }
+        const y = diagonal - x;
+        const tile = this.tileAt(x, y);
+        if (tile) this.drawGroundTile(context, battle, tile);
+        x += 1;
       }
+      this.cacheBuildStats.ground = Math.max(this.cacheBuildStats.ground, performance.now() - chunkStart);
       if (diagonal <= maxDiagonal) {
         setTimeout(buildChunk, 0);
         return;
@@ -72,6 +94,7 @@ export class CanvasRenderer {
       if (key === this.groundStateKey()) {
         this.groundCache = cache;
         this.groundCacheKey = key;
+        this.staticLayerDirty = true;
         this.requestRender();
         return;
       }
@@ -92,65 +115,119 @@ export class CanvasRenderer {
   draw() {
     const frameStart = performance.now();
     this.frameRequested = false;
-    this.resize();
+    if (this.resize()) this.staticLayerDirty = true;
     const context = this.context;
-    context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
-    context.imageSmoothingEnabled = true;
-    context.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
-    this.drawBackdrop(context, this.canvas.clientWidth, this.canvas.clientHeight);
-
+    const staticStart = performance.now();
     const translateX = this.canvas.clientWidth / 2 + this.camera.x;
     const translateY = 130 + this.camera.y;
     const bounds = this.visibleBounds(translateX, translateY);
     const battle = this.scene.battle;
+    const staticRendered = this.drawStaticLayer(translateX, translateY, bounds, battle);
+    const dynamicStart = performance.now();
+
+    context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+    context.imageSmoothingEnabled = true;
+    context.clearRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
 
     context.save();
     context.translate(translateX, translateY);
     context.scale(this.camera.zoom, this.camera.zoom);
 
-    const groundStart = performance.now();
-    const cachedGround = this.drawGround(bounds, battle);
-    const propsStart = performance.now();
-    this.drawVisibleProps(bounds, battle);
     const unitsStart = performance.now();
+    if (!battle) this.drawWorldMoveDistances(bounds);
     this.drawUnits(battle);
     const floatersStart = performance.now();
     if (battle) this.drawDamageFloaters(battle);
     const frameEnd = performance.now();
     context.restore();
     this.lastStats = {
-      cachedGround,
+      cachedGround: staticRendered ? this.groundCache && this.groundCacheKey === this.groundStateKey() : true,
+      action: this.scene.lastActionStats?.total ?? 0,
+      actionHud: this.scene.lastActionStats?.hud ?? 0,
+      actionRules: this.scene.lastActionStats?.rules ?? 0,
+      actionTactical: this.scene.lastActionStats?.tactical ?? 0,
+      dynamic: frameEnd - dynamicStart,
       floaters: frameEnd - floatersStart,
-      ground: propsStart - groundStart,
-      props: unitsStart - propsStart,
+      ground: this.lastStaticStats?.ground ?? 0,
+      groundBuild: this.cacheBuildStats.ground,
+      props: this.lastStaticStats?.props ?? 0,
+      propBuild: this.cacheBuildStats.props,
+      static: dynamicStart - staticStart,
+      staticRendered,
       total: frameEnd - frameStart,
       units: floatersStart - unitsStart,
     };
-    this.performanceMonitor?.record(this.lastStats.total);
+    this.performanceMonitor?.record(this.lastStats.total, this.lastStats);
+    this.scene.lastActionStats = null;
+    this.cacheBuildStats.ground = 0;
+    this.cacheBuildStats.props = 0;
   }
 
   resize() {
     this.pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     const width = Math.floor(this.canvas.clientWidth * this.pixelRatio);
     const height = Math.floor(this.canvas.clientHeight * this.pixelRatio);
-    if (this.canvas.width !== width || this.canvas.height !== height) {
-      this.canvas.width = width;
-      this.canvas.height = height;
-    }
+    const changed = this.canvas.width !== width || this.canvas.height !== height;
+    if (!changed) return false;
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.staticCanvas.width = width;
+    this.staticCanvas.height = height;
+    return true;
   }
 
-  drawGround(bounds, battle) {
+  drawStaticLayer(translateX, translateY, bounds, battle) {
+    const key = this.staticStateKey(translateX, translateY, battle);
+    if (!this.staticLayerDirty && this.staticLayerKey === key) return false;
+    const context = this.staticContext;
+    context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+    context.imageSmoothingEnabled = true;
+    context.clearRect(0, 0, this.staticCanvas.clientWidth, this.staticCanvas.clientHeight);
+    this.drawBackdrop(context, this.staticCanvas.clientWidth, this.staticCanvas.clientHeight);
+    context.save();
+    context.translate(translateX, translateY);
+    context.scale(this.camera.zoom, this.camera.zoom);
+    const groundStart = performance.now();
+    const cachedGround = this.drawGround(bounds, battle, context);
+    const propsStart = performance.now();
+    this.drawVisibleProps(bounds, battle, context);
+    const end = performance.now();
+    context.restore();
+    this.lastStaticStats = {
+      cachedGround,
+      ground: propsStart - groundStart,
+      props: end - propsStart,
+    };
+    this.staticLayerDirty = false;
+    this.staticLayerKey = key;
+    return true;
+  }
+
+  staticStateKey(translateX, translateY, battle) {
+    return [
+      this.canvas.clientWidth,
+      this.canvas.clientHeight,
+      translateX.toFixed(1),
+      translateY.toFixed(1),
+      this.camera.zoom.toFixed(3),
+      this.groundStateKey(),
+      this.groundCacheKey,
+      this.propStateKey(battle),
+      this.propCacheKey,
+    ].join("|");
+  }
+
+  drawGround(bounds, battle, target = this.context) {
     const key = this.groundStateKey();
     if (this.groundCache && this.groundCacheKey === key) {
-      this.drawCacheLayer(this.groundCache, bounds);
+      this.drawCacheLayer(target, this.groundCache, bounds);
       return true;
     }
     this.scheduleGroundBuild();
     if (this.groundCache) {
-      this.drawCacheLayer(this.groundCache, bounds);
+      this.drawCacheLayer(target, this.groundCache, bounds);
       return true;
     }
-    this.drawGroundTiles(this.context, battle, bounds);
     return false;
   }
 
@@ -169,14 +246,14 @@ export class CanvasRenderer {
     return cache;
   }
 
-  drawCacheLayer(cache, bounds) {
+  drawCacheLayer(target, cache, bounds) {
     const sx = clamp(bounds.left - cache.x, 0, cache.width);
     const sy = clamp(bounds.top - cache.y, 0, cache.height);
     const ex = clamp(bounds.right - cache.x, 0, cache.width);
     const ey = clamp(bounds.bottom - cache.y, 0, cache.height);
     const sw = Math.max(1, ex - sx);
     const sh = Math.max(1, ey - sy);
-    this.context.drawImage(cache.canvas, sx, sy, sw, sh, cache.x + sx, cache.y + sy, sw, sh);
+    target.drawImage(cache.canvas, sx, sy, sw, sh, cache.x + sx, cache.y + sy, sw, sh);
   }
 
   drawBackdrop(context, width, height) {
@@ -201,14 +278,18 @@ export class CanvasRenderer {
       const y = diagonal - x;
       const tile = this.tileAt(x, y);
       if (!tile || (bounds && this.tileOutsideBounds(tile.x, tile.y, bounds))) continue;
-      const state = this.tileState(tile, battle);
-      if (battle && !this.inBattleBounds(battle, tile)) {
-        this.drawTintedTile(target, tile, "battleFog");
-      } else if (state) {
-        this.drawTintedTile(target, tile, state);
-      } else {
-        this.drawTile(target, tile, tile.sprite);
-      }
+      this.drawGroundTile(target, battle, tile);
+    }
+  }
+
+  drawGroundTile(target, battle, tile) {
+    const state = this.tileState(tile, battle);
+    if (battle && !this.inBattleBounds(battle, tile)) {
+      this.drawTintedTile(target, tile, "battleFog");
+    } else if (state) {
+      this.drawTintedTile(target, tile, state);
+    } else {
+      this.drawTile(target, tile, tile.sprite);
     }
   }
 
@@ -270,26 +351,22 @@ export class CanvasRenderer {
     return canvas;
   }
 
-  drawVisibleProps(bounds, battle) {
+  drawVisibleProps(bounds, battle, target = this.context) {
     const key = this.propStateKey(battle);
     if (this.propCache && this.propCacheKey === key) {
-      this.drawCacheLayer(this.propCache, bounds);
+      this.drawCacheLayer(target, this.propCache, bounds);
       return;
     }
     this.schedulePropBuild();
     if (this.propCache) {
-      this.drawCacheLayer(this.propCache, bounds);
+      this.drawCacheLayer(target, this.propCache, bounds);
       return;
-    }
-    const actors = this.coverActors(battle);
-    for (const drawable of this.propDrawables) {
-      if (this.drawableOutsideBounds(drawable, bounds)) continue;
-      this.drawPropDrawable(this.context, drawable, battle, actors);
     }
   }
 
   invalidateProps() {
     this.propCacheKey = "";
+    this.staticLayerDirty = true;
     this.schedulePropBuild();
   }
 
@@ -308,6 +385,7 @@ export class CanvasRenderer {
         this.drawPropDrawable(context, this.propDrawables[index], battle, actors);
         index += 1;
       }
+      this.cacheBuildStats.props = Math.max(this.cacheBuildStats.props, performance.now() - chunkStart);
       if (index < this.propDrawables.length) {
         setTimeout(buildChunk, 0);
         return;
@@ -316,6 +394,7 @@ export class CanvasRenderer {
       if (key === this.propStateKey(this.scene.battle)) {
         this.propCache = cache;
         this.propCacheKey = key;
+        this.staticLayerDirty = true;
         this.requestRender();
         return;
       }
@@ -437,25 +516,48 @@ export class CanvasRenderer {
         this.drawSelectionCircle(drawable.position, drawable.side);
         return;
       }
-      const { position, asset, alpha, combatant } = drawable;
-      this.drawSprite(this.context, position.x, position.y, asset, 1, alpha);
+      const { position, asset, alpha, animationName, animationTime, combatant } = drawable;
+      this.drawSprite(this.context, position.x, position.y, asset, 1, alpha, "none", animationName, animationTime);
       if (combatant && !combatant.inactive) this.drawHealthBar(position.x, position.y, combatant);
     });
+  }
+
+  drawWorldMoveDistances(bounds) {
+    if (!this.scene.selectedArmyId || !this.scene.reachableDistances?.size) return;
+    this.context.save();
+    this.context.font = "800 11px Arial, sans-serif";
+    this.context.textAlign = "center";
+    this.context.textBaseline = "middle";
+    this.context.lineWidth = 3;
+    this.context.globalAlpha = 0.68;
+    for (const [tileKey, distance] of this.scene.reachableDistances) {
+      if (distance <= 0) continue;
+      const [x, y] = tileKey.split(",").map(Number);
+      if (bounds && this.tileOutsideBounds(x, y, bounds)) continue;
+      const position = this.centerFor(x, y);
+      this.context.strokeStyle = "rgba(11, 17, 22, 0.68)";
+      this.context.fillStyle = "rgba(245, 236, 193, 0.76)";
+      this.context.strokeText(String(distance), position.x, position.y - 6);
+      this.context.fillText(String(distance), position.x, position.y - 6);
+    }
+    this.context.restore();
   }
 
   queueUnit(drawables, sprite, unit, selected, side, combatant = null, alpha = 1) {
     if (combatant?.hp <= 0) return;
     const asset = this.art.assets[sprite];
     const position = this.animatedCenter(unit);
+    const animationName = unit.animation?.kind === "move" ? "walk" : undefined;
+    const animationTime = animationName ? Math.max(0, performance.now() - unit.animation.started - (unit.animation.delay ?? 0)) : undefined;
     if (selected && !combatant?.inactive) {
       drawables.push({ kind: "circle", position, side, y: position.y + (asset.draw.depth ?? 0) - 0.2 });
     }
-    drawables.push({ alpha, asset, combatant, position, y: position.y + (asset.draw.depth ?? 0) });
+    drawables.push({ alpha, animationName, animationTime, asset, combatant, position, y: position.y + (asset.draw.depth ?? 0) });
   }
 
-  drawSprite(target, x, y, asset, scale = 1, alpha = 1, filter = "none") {
+  drawSprite(target, x, y, asset, scale = 1, alpha = 1, filter = "none", animationName = undefined, animationTime = undefined) {
     const draw = asset.draw;
-    const image = this.spriteImage(asset);
+    const image = this.spriteImage(asset, animationName, animationTime);
     const height = draw.height * scale;
     const width = (draw.width ?? Math.round(image.width * (draw.height / image.height))) * scale;
     target.save();
@@ -473,12 +575,12 @@ export class CanvasRenderer {
     target.restore();
   }
 
-  spriteImage(asset) {
+  spriteImage(asset, animationName = undefined, animationTime = undefined) {
     if (!asset.frames?.length) return asset.image;
-    const animation = asset.animations?.[asset.defaultAnimation] ?? asset.animations?.idle;
+    const animation = asset.animations?.[animationName] ?? asset.animations?.[asset.defaultAnimation] ?? asset.animations?.idle;
     const frameIds = animation?.frames?.length ? animation.frames : asset.frames.map((_, index) => index);
     const frameMs = animation?.frameMs ?? 160;
-    const now = performance.now();
+    const now = animationTime ?? performance.now();
     const frameId = frameIds[Math.floor(now / frameMs) % frameIds.length] ?? 0;
     this.scheduleAnimatedSpriteRender(frameMs - (now % frameMs) + 1);
     return asset.frames[frameId]?.image ?? asset.image;
@@ -573,15 +675,16 @@ export class CanvasRenderer {
       length += segmentLength;
     }
     animation.pathMetrics = {
-      duration: Math.max(80, length / MOVE_PATH_SPEED),
+      duration: Math.max(animation.duration ?? 80, length / this.pathMoveSpeed(animation)),
       points,
       segments,
+      speed: this.pathMoveSpeed(animation),
     };
     return animation.pathMetrics;
   }
 
   pathPosition(metrics, elapsed) {
-    let remaining = elapsed * MOVE_PATH_SPEED;
+    let remaining = elapsed * metrics.speed;
     for (let index = 0; index < metrics.segments.length; index += 1) {
       const from = metrics.points[index];
       const to = metrics.points[index + 1];
@@ -593,6 +696,12 @@ export class CanvasRenderer {
       remaining -= length;
     }
     return metrics.points[metrics.points.length - 1];
+  }
+
+  pathMoveSpeed(animation) {
+    if (!animation.duration) return MOVE_PATH_SPEED;
+    const reference = pointDistance(this.centerFor(0, 0), this.centerFor(1, 0));
+    return reference / animation.duration;
   }
 
   shakenPosition(unit, position) {

@@ -7,9 +7,10 @@ const FRAME_BUDGET_MS = 16;
 const HEAVY_SPIKE_MS = 30;
 
 export class PerformanceMonitor {
-  constructor({ canvas, valueNode }) {
+  constructor({ canvas, detailsNode, valueNode }) {
     this.canvas = canvas;
     this.context = canvas?.getContext("2d", { alpha: true }) ?? null;
+    this.detailsNode = detailsNode;
     this.valueNode = valueNode;
     this.samples = new Float32Array(HISTORY_SIZE);
     this.cursor = 0;
@@ -34,7 +35,7 @@ export class PerformanceMonitor {
     this.draw();
   }
 
-  record(frameMs) {
+  record(frameMs, details = null) {
     if (!this.context) return;
     const now = performance.now();
     this.lastFrameMs = frameMs;
@@ -44,6 +45,7 @@ export class PerformanceMonitor {
 
     if (this.valueNode && now - this.lastValueAt >= VALUE_UPDATE_INTERVAL_MS) {
       this.valueNode.textContent = frameMs.toFixed(2);
+      if (this.detailsNode && details) this.detailsNode.textContent = formatDetails(details);
       this.lastValueAt = now;
     }
 
@@ -114,6 +116,14 @@ export class PerformanceMonitor {
     }
     ctx.restore();
   }
+}
+
+function formatDetails(details) {
+  const entries = Object.entries(details)
+    .filter(([, value]) => typeof value === "number" && Number.isFinite(value))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+  return entries.map(([name, value]) => `${name}:${value.toFixed(1)}`).join(" ");
 }
 
 function getSampleColor(sample) {

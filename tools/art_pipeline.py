@@ -33,7 +33,7 @@ def crop_manifest_assets(manifest_path: Path, root: Path) -> list[Path]:
             continue
         if "frames" in asset:
             for frame in asset["frames"]:
-                crop = crop_asset_frame(atlases[asset["atlas"]], frame, asset)
+                crop = crop_asset_frame(atlases[frame.get("atlas", asset["atlas"])], frame, asset)
                 output = root / frame["file"]
                 output.parent.mkdir(parents=True, exist_ok=True)
                 crop.save(output)
@@ -70,6 +70,21 @@ def remove_checker_background(image: Image.Image) -> Image.Image:
             red, green, blue, alpha = pixels[x, y]
             if alpha and abs(red - green) <= 3 and abs(green - blue) <= 3 and red >= 235:
                 pixels[x, y] = (0, 0, 0, 0)
+    fringe: list[tuple[int, int]] = []
+    for y in range(height):
+        for x in range(width):
+            red, green, blue, alpha = pixels[x, y]
+            if not alpha or min(red, green, blue) < 180 or max(red, green, blue) - min(red, green, blue) > 55:
+                continue
+            touches_transparent = False
+            for ny in range(max(0, y - 1), min(height, y + 2)):
+                for nx in range(max(0, x - 1), min(width, x + 2)):
+                    if pixels[nx, ny][3] == 0:
+                        touches_transparent = True
+            if touches_transparent:
+                fringe.append((x, y))
+    for x, y in fringe:
+        pixels[x, y] = (0, 0, 0, 0)
     return rgba
 
 

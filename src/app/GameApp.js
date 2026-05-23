@@ -1,14 +1,14 @@
 import { CameraDirector } from "./CameraDirector.js?v=battle-test-43";
-import { ART_VERSION, DEFAULT_ZOOM } from "./config.js?v=battle-test-43";
+import { ART_VERSION, DEFAULT_ZOOM } from "./config.js?v=world-map-1";
 import { HudController } from "./HudController.js?v=battle-test-43";
 import { InputController } from "./InputController.js?v=battle-test-43";
 import { loadArtCatalog } from "../engine/artCatalog.js";
 import { createCamera } from "../engine/camera.js";
 import { applyTileCenters, createIso, screenToTile, worldToScreen } from "../engine/iso.js?v=tile-pick-1";
-import { createRenderer } from "../engine/renderer.js?v=perf-cache-1";
+import { createRenderer } from "../engine/renderer.js?v=world-turn-1";
 import { activeCombatant, battleAttackTiles, battleGuardTiles, battleMoveTiles, handleBattleTap, isEnemyTurn, renameUnit, resolveEnemyTurn, selectUnit, waitBattleTurn } from "../gameplay/battleActions.js?v=move-path-1";
-import { attackableArmyTiles, engageTiles, handleTileTap, reachableTiles } from "../gameplay/worldActions.js?v=battle-test-43";
-import { createScene } from "../universe/map.js?v=battle-test-43";
+import { attackableArmyTiles, endWorldTurn, engageTiles, handleTileTap, reachableDistances, reachableTiles } from "../gameplay/worldActions.js?v=world-turn-1";
+import { createScene } from "../universe/map.js?v=world-map-2";
 import { PerformanceMonitor } from "../ui/PerformanceMonitor.js?v=battle-test-43";
 
 export class GameApp {
@@ -20,10 +20,15 @@ export class GameApp {
     this.renderer = null;
     this.performanceMonitor = new PerformanceMonitor({
       canvas: document.querySelector("#perfGraph"),
+      detailsNode: document.querySelector("#perfDetails"),
       valueNode: document.querySelector("#frameMs"),
     });
     this.camera = createCamera(this.canvas, () => this.renderer?.requestRender());
     this.camera.zoom = DEFAULT_ZOOM;
+    this.worldTurnHud = document.querySelector("#worldTurnHud");
+    this.worldDay = document.querySelector("#worldDay");
+    this.worldTime = document.querySelector("#worldTime");
+    this.endWorldTurn = document.querySelector("#endWorldTurn");
     this.hud = new HudController({
       battleHud: document.querySelector("#battleHud"),
       battleReadout: document.querySelector("#battleReadout"),
@@ -61,7 +66,7 @@ export class GameApp {
       iso: this.iso,
       renderer: this.renderer,
     });
-    this.cameraDirector.focusOn(this.tileAt(14, 14), DEFAULT_ZOOM);
+    this.cameraDirector.focusOn(this.centerTile(), DEFAULT_ZOOM);
     this.renderer.start();
     window.addEventListener("resize", () => this.performanceMonitor.resize());
 
@@ -74,6 +79,7 @@ export class GameApp {
     });
     this.bindControls();
     this.hud.update(this.scene);
+    this.updateWorldTurnHud();
   }
 
   bindControls() {
@@ -87,18 +93,22 @@ export class GameApp {
     document.querySelector("#reroll").addEventListener("click", () => {
       this.seed += 1;
       this.resetScene(createScene(this.seed));
-      this.cameraDirector.focusOn(this.tileAt(14, 14), DEFAULT_ZOOM);
+      this.cameraDirector.focusOn(this.centerTile(), DEFAULT_ZOOM);
       this.hud.update(this.scene);
+      this.updateWorldTurnHud();
       this.renderer.rebuildStatic();
     });
+    this.endWorldTurn.addEventListener("click", () => this.handleEndWorldTurn());
   }
 
   handleTap(screenX, screenY) {
+    const actionStart = performance.now();
     const tile = this.scene.battle
       ? screenToTile(screenX, screenY, this.canvas, this.camera, this.iso, this.scene, this.artCatalog)
       : this.selectedWorldTile(screenX, screenY);
     const result = this.scene.battle ? handleBattleTap(this.scene, tile) : handleTileTap(this.scene, tile);
-    this.refreshAfterAction();
+    const rulesEnd = performance.now();
+    this.refreshAfterAction({ rules: rulesEnd - actionStart, started: actionStart });
     if (result.type === "battle-started") {
       this.cameraDirector.animateTo(this.tileAt(result.center.x, result.center.y), this.cameraDirector.battleZoom(), 520);
     }
@@ -106,9 +116,19 @@ export class GameApp {
   }
 
   handleWait() {
+    const actionStart = performance.now();
     waitBattleTurn(this.scene);
-    this.refreshAfterAction();
+    const rulesEnd = performance.now();
+    this.refreshAfterAction({ rules: rulesEnd - actionStart, started: actionStart });
     this.scheduleEnemyTurns();
+  }
+
+  handleEndWorldTurn() {
+    const actionStart = performance.now();
+    const result = endWorldTurn(this.scene);
+    const rulesEnd = performance.now();
+    if (result.type === "army-moving") return;
+    this.refreshAfterAction({ rules: rulesEnd - actionStart, started: actionStart });
   }
 
   handleRename(unitId) {
@@ -126,9 +146,19 @@ export class GameApp {
     this.refreshAfterAction();
   }
 
-  refreshAfterAction() {
+  refreshAfterAction(profile = {}) {
+    const start = performance.now();
     this.refreshTacticalSets();
+    const tacticalEnd = performance.now();
     this.hud.update(this.scene);
+    this.updateWorldTurnHud();
+    const hudEnd = performance.now();
+    this.scene.lastActionStats = {
+      hud: hudEnd - tacticalEnd,
+      rules: profile.rules ?? 0,
+      tactical: tacticalEnd - start,
+      total: hudEnd - (profile.started ?? start),
+    };
     this.renderer.requestRender();
   }
 
@@ -139,6 +169,7 @@ export class GameApp {
     this.scene.inspectedArmyId = next.inspectedArmyId;
     this.scene.battle = next.battle;
     this.scene.tileset = next.tileset;
+    this.scene.world = next.world;
     clearTimeout(this.enemyTurnTimer);
     this.enemyTurnTimer = 0;
     applyTileCenters(this.scene, this.iso);
@@ -174,6 +205,7 @@ export class GameApp {
 
   refreshTacticalSets() {
     this.scene.reachable = reachableTiles(this.scene);
+    this.scene.reachableDistances = reachableDistances(this.scene);
     this.scene.engageTiles = engageTiles(this.scene);
     this.scene.worldAttackTiles = attackableArmyTiles(this.scene);
     const playerControl = this.scene.battle && activeCombatant(this.scene.battle)?.side === "player";
@@ -187,8 +219,19 @@ export class GameApp {
       battleMoves: setRenderKey(this.scene.battleMoves),
       engageTiles: setRenderKey(this.scene.engageTiles),
       reachable: setRenderKey(this.scene.reachable),
+      reachableDistances: distanceRenderKey(this.scene.reachableDistances),
       worldAttackTiles: setRenderKey(this.scene.worldAttackTiles),
     };
+  }
+
+  updateWorldTurnHud() {
+    if (!this.worldTurnHud) return;
+    const world = this.scene?.world ?? { day: 1, timeLabel: "6am" };
+    this.worldTurnHud.hidden = Boolean(this.scene?.battle);
+    this.worldDay.textContent = `Day ${world.day}`;
+    this.worldTime.textContent = world.timeLabel;
+    this.endWorldTurn.disabled = Boolean(this.scene?.battle)
+      || this.scene.armies.some((army) => army.animation?.kind === "move");
   }
 
   scheduleEnemyTurns() {
@@ -204,10 +247,22 @@ export class GameApp {
   tileAt(x, y) {
     return this.scene.tileset?.at(x, y) ?? this.scene.tiles[y * this.scene.size + x];
   }
+
+  centerTile() {
+    const center = Math.floor(this.scene.size / 2);
+    return this.tileAt(center, center);
+  }
 }
 
 function setRenderKey(set) {
   return [...(set ?? new Set())].sort().join(";");
+}
+
+function distanceRenderKey(map) {
+  return [...(map ?? new Map()).entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([tile, distance]) => `${tile}:${distance}`)
+    .join(";");
 }
 
 function actorRenderKey(scene) {

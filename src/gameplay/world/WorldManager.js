@@ -1,8 +1,11 @@
 import { createBattle } from "../battleActions.js?v=battle-test-43";
 
+const WORLD_TIMES = ["6am", "1pm", "4pm", "8pm", "1am"];
+
 export class WorldManager {
   handleTileTap(scene, tile) {
     if (scene.battle) return { type: "battle-open" };
+    if (scene.armies.some((army) => army.animation?.kind === "move")) return { type: "army-moving" };
     if (!this.inBounds(scene, tile)) return { type: "miss" };
 
     const tappedArmy = this.armyAt(scene, tile.x, tile.y);
@@ -24,9 +27,38 @@ export class WorldManager {
     if (!selected || !this.canReach(scene, selected, tile) || tappedArmy || this.tileBlocked(scene, tile.x, tile.y)) {
       return this.clearSelection(scene);
     }
-    selected.x = tile.x;
-    selected.y = tile.y;
+    this.moveArmy(scene, selected, tile);
     return { type: "moved", army: selected };
+  }
+
+  moveArmy(scene, army, tile) {
+    const path = this.movementPath(scene, army, tile);
+    const cost = Math.max(0, path.length - 1);
+    army.animation = {
+      fromX: army.x,
+      fromY: army.y,
+      kind: "move",
+      path,
+      started: performance.now(),
+      toX: tile.x,
+      toY: tile.y,
+    };
+    army.x = tile.x;
+    army.y = tile.y;
+    army.movementLeft = Math.max(0, (army.movementLeft ?? army.move) - cost);
+  }
+
+  endTurn(scene) {
+    if (scene.battle) return { type: "battle-open" };
+    if (scene.armies.some((army) => army.animation?.kind === "move")) return { type: "army-moving" };
+    scene.world ??= { day: 1, timeIndex: 0, timeLabel: WORLD_TIMES[0] };
+    scene.world.timeIndex = (scene.world.timeIndex + 1) % WORLD_TIMES.length;
+    if (scene.world.timeIndex === 0) scene.world.day += 1;
+    scene.world.timeLabel = WORLD_TIMES[scene.world.timeIndex];
+    for (const army of scene.armies) {
+      if (army.faction === "player") army.movementLeft = army.move;
+    }
+    return { type: "world-turn-ended", world: scene.world };
   }
 
   clearSelection(scene) {
@@ -45,23 +77,30 @@ export class WorldManager {
     const army = this.selectedArmy(scene) ?? this.inspectedArmy(scene);
     if (!army || scene.battle) return new Set();
     const tiles = new Set();
-    for (let y = 0; y < scene.size; y += 1) {
-      for (let x = 0; x < scene.size; x += 1) {
-        if (this.canReach(scene, army, { x, y }) && !this.armyAt(scene, x, y) && !this.tileBlocked(scene, x, y)) tiles.add(`${x},${y}`);
-      }
+    for (const tileKey of this.reachableTileKeys(scene, army)) {
+      const [x, y] = tileKey.split(",").map(Number);
+      if (!this.armyAt(scene, x, y) && !this.tileBlocked(scene, x, y)) tiles.add(tileKey);
     }
     return tiles;
+  }
+
+  reachableDistances(scene) {
+    const army = this.selectedArmy(scene) ?? this.inspectedArmy(scene);
+    if (!army || scene.battle) return new Map();
+    return this.reachableDistanceMap(scene, army);
   }
 
   engageTiles(scene) {
     const army = this.selectedArmy(scene);
     if (!army || scene.battle) return new Set();
     const tiles = new Set();
+    const reachable = this.reachableTileKeys(scene, army);
     for (const enemy of scene.armies) {
       if (enemy.faction === army.faction) continue;
       for (const tile of this.neighbors(enemy)) {
-        if (this.inBounds(scene, tile) && this.canReach(scene, army, tile) && !this.armyAt(scene, tile.x, tile.y) && !this.tileBlocked(scene, tile.x, tile.y)) {
-          tiles.add(`${tile.x},${tile.y}`);
+        const tileKey = `${tile.x},${tile.y}`;
+        if (this.inBounds(scene, tile) && reachable.has(tileKey) && !this.armyAt(scene, tile.x, tile.y) && !this.tileBlocked(scene, tile.x, tile.y)) {
+          tiles.add(tileKey);
         }
       }
     }
@@ -93,20 +132,51 @@ export class WorldManager {
   }
 
   reachableTileKeys(scene, army) {
+    return new Set(this.reachableDistanceMap(scene, army).keys());
+  }
+
+  reachableDistanceMap(scene, army) {
+    const maxDistance = army.movementLeft ?? army.move;
     const reached = new Set([`${army.x},${army.y}`]);
+    const distances = new Map([[`${army.x},${army.y}`, 0]]);
     const queue = [{ x: army.x, y: army.y, distance: 0 }];
     for (let index = 0; index < queue.length; index += 1) {
       const current = queue[index];
-      if (current.distance >= army.move) continue;
+      if (current.distance >= maxDistance) continue;
       for (const next of this.neighbors(current)) {
         const nextKey = `${next.x},${next.y}`;
         if (!this.inBounds(scene, next) || reached.has(nextKey)) continue;
         if (this.tileBlocked(scene, next.x, next.y) || this.armyAt(scene, next.x, next.y)) continue;
         reached.add(nextKey);
+        distances.set(nextKey, current.distance + 1);
         queue.push({ ...next, distance: current.distance + 1 });
       }
     }
-    return reached;
+    return distances;
+  }
+
+  movementPath(scene, army, destination) {
+    const start = { x: army.x, y: army.y };
+    const targetKey = key(destination.x, destination.y);
+    if (key(start.x, start.y) === targetKey) return [start];
+
+    const visited = new Set([key(start.x, start.y)]);
+    const previous = new Map();
+    const queue = [start];
+    for (let index = 0; index < queue.length; index += 1) {
+      const current = queue[index];
+      for (const next of this.movementNeighbors(current, destination)) {
+        const nextKey = key(next.x, next.y);
+        if (visited.has(nextKey) || !this.inBounds(scene, next)) continue;
+        const occupant = this.armyAt(scene, next.x, next.y);
+        if (this.tileBlocked(scene, next.x, next.y) || (occupant && occupant.id !== army.id)) continue;
+        visited.add(nextKey);
+        previous.set(nextKey, key(current.x, current.y));
+        if (nextKey === targetKey) return buildPath(previous, start, destination);
+        queue.push(next);
+      }
+    }
+    return [start, { x: destination.x, y: destination.y }];
   }
 
   adjacent(a, b) {
@@ -122,6 +192,10 @@ export class WorldManager {
     ];
   }
 
+  movementNeighbors(tile, destination) {
+    return this.neighbors(tile).sort((a, b) => distance(a, destination) - distance(b, destination));
+  }
+
   inBounds(scene, tile) {
     return tile.x >= 0 && tile.y >= 0 && tile.x < scene.size && tile.y < scene.size;
   }
@@ -129,4 +203,25 @@ export class WorldManager {
   tileBlocked(scene, x, y) {
     return Boolean(scene.tileset?.at(x, y)?.blocksMovement);
   }
+}
+
+function key(x, y) {
+  return `${x},${y}`;
+}
+
+function buildPath(previous, start, destination) {
+  const path = [{ x: destination.x, y: destination.y }];
+  let cursor = key(destination.x, destination.y);
+  const startKey = key(start.x, start.y);
+  while (cursor !== startKey) {
+    cursor = previous.get(cursor);
+    if (!cursor) return [start, { x: destination.x, y: destination.y }];
+    const [x, y] = cursor.split(",").map(Number);
+    path.push({ x, y });
+  }
+  return path.reverse();
+}
+
+function distance(a, b) {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }

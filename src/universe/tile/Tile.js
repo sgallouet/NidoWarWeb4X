@@ -1,9 +1,10 @@
 export class Tile {
-  constructor({ x, y, sprite, items = [] }) {
+  constructor({ x, y, sprite, items = [], terrainBlocksMovement = false }) {
     this.x = x;
     this.y = y;
     this.sprite = sprite;
     this.items = items;
+    this.terrainBlocksMovement = terrainBlocksMovement;
     this.center = { x: 0, y: 0 };
     this.origin = { x: 0, y: 0 };
   }
@@ -13,7 +14,7 @@ export class Tile {
   }
 
   get blocksMovement() {
-    return this.items.some((item) => item.blocksMovement !== false);
+    return this.terrainBlocksMovement || this.items.some((item) => item.blocksMovement !== false);
   }
 
   setGeometry(origin, center) {

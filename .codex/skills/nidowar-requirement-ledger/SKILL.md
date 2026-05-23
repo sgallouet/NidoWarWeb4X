@@ -69,3 +69,6 @@ For every new durable rule in this repo:
 - NW-R051: Clicking trait icons is informational and must not spend or trigger a unit attack.
 - NW-R052: In battle mode, the End button ends the player side's turn and passes control to the enemy side.
 - NW-R053: Battle movement animations should travel tile-to-tile, may use diagonal steps, should avoid blocked/occupied tiles when possible, and should keep visually consistent speed.
+- NW-R054: Battle profiling should expose render, cache-build, and action-stage timings so performance fixes target the actual hot path.
+- NW-R055: World-map terrain should avoid old low-resolution tile sprites when high-resolution replacements exist.
+- NW-R056: World-map army movement should animate tile-to-tile along the actual movement path instead of teleporting.
